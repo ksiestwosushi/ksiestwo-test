@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <meta name="description" content="Księstwo Sushi & Ramen - Cinematic Dining Experience">
   <title>Księstwo Sushi & Ramen — ROYAL</title>
   
   <!-- FONTS -->
@@ -10,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- TAILWIND -->
+  <!-- TAILWIND CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -53,20 +54,30 @@
       }
     }
   </script>
-
-  <!-- REACT & BABEL -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
   <style>
+    /* CORE STYLES & PROTECTION */
     body {
-      background-color: #0F0F0F; /* Default to dark to match intro/lang */
+      background-color: #0F0F0F;
       color: #0F0F0F;
       overflow-x: hidden;
+      /* Prevent text selection */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
     
-    /* Hide scrollbar for Dynamic Island horizontal scroll */
+    img {
+      /* Prevent image dragging */
+      -webkit-user-drag: none;
+      -khtml-user-drag: none;
+      -moz-user-drag: none;
+      -o-user-drag: none;
+      user-drag: none;
+      pointer-events: none;
+    }
+
+    /* CUSTOM UTILITIES */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -75,37 +86,173 @@
       scrollbar-width: none;
     }
 
-    /* Parallax Effect Utility */
     .parallax-bg {
       background-attachment: fixed;
       background-position: center;
       background-repeat: no-repeat;
       background-size: cover;
     }
+    
+    /* Disable parallax on mobile for performance */
     @media (pointer: coarse) {
         .parallax-bg {
-            background-attachment: scroll; /* Disable fixed bg on mobile for performance */
+            background-attachment: scroll;
         }
     }
   </style>
-<link rel="stylesheet" href="/index.css">
 <script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
-<body>
-  <div id="root"></div>
+<body class="antialiased">
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+  <!-- INTRO SCREEN -->
+  <div id="intro" class="fixed inset-0 z-[9999] bg-ink flex flex-col items-center justify-center transition-opacity duration-1000">
+    <div class="relative text-center p-8 flex flex-col items-center">
+      <h1 class="font-cinzel text-6xl md:text-9xl text-white font-bold tracking-[0.2em] mb-6 animate-slide-up">
+        KS
+      </h1>
+      <div class="h-[2px] bg-gold mb-6 animate-grow-line"></div>
+      <div class="text-gold uppercase tracking-[0.5em] font-rajdhani text-sm animate-fade-in" style="animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards;">
+        CINEMATIC DINING
+      </div>
+    </div>
+  </div>
 
-    // --- UI TRANSLATIONS ---
+  <!-- LANGUAGE SELECTION -->
+  <div id="lang-select" class="fixed inset-0 z-[9990] bg-ink flex flex-col items-center justify-center transition-opacity duration-700 opacity-0 pointer-events-none">
+    <div class="relative z-10 text-center p-8 w-full max-w-lg flex flex-col items-center">
+       <div class="w-16 h-16 border border-gold text-gold flex items-center justify-center font-cinzel text-xl mx-auto mb-16 animate-fade-in">KS</div>
+       
+       <div class="flex gap-8 justify-center w-full">
+         <button onclick="setLanguage('pl')" class="w-40 h-14 border border-white/20 hover:border-gold hover:bg-gold/10 transition-all duration-500 flex items-center justify-center group cursor-pointer">
+           <span class="font-rajdhani text-white text-xl tracking-[0.2em] group-hover:text-gold transition-colors">PL</span>
+         </button>
+
+         <button onclick="setLanguage('en')" class="w-40 h-14 border border-white/20 hover:border-gold hover:bg-gold/10 transition-all duration-500 flex items-center justify-center group cursor-pointer">
+           <span class="font-rajdhani text-white text-xl tracking-[0.2em] group-hover:text-gold transition-colors">EN</span>
+         </button>
+       </div>
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION -->
+  <div id="app" class="min-h-screen bg-alabaster transition-opacity duration-1000 opacity-0 relative hidden">
+    
+    <!-- NAVIGATION (DYNAMIC ISLAND) -->
+    <div id="dynamic-island-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center transition-all duration-300">
+      <div id="island" class="bg-ink/90 backdrop-blur-xl text-white shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden flex flex-col w-[140px] h-[44px] rounded-full cursor-pointer hover:w-[160px] hover:scale-105">
+        
+        <!-- Collapsed -->
+        <div id="island-collapsed" class="w-full h-[44px] absolute top-0 left-0 flex items-center justify-center gap-2 transition-opacity duration-300">
+          <div class="w-2 h-2 rounded-full bg-gold animate-pulse"></div>
+          <span class="font-cinzel font-bold text-xs tracking-widest text-gold">MENU</span>
+        </div>
+
+        <!-- Expanded -->
+        <div id="island-expanded" class="flex flex-col gap-6 w-full p-6 opacity-0 hidden transition-opacity duration-300">
+          <div class="flex justify-between items-center border-b border-white/10 pb-4">
+             <div class="flex items-center gap-3">
+               <div class="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center font-cinzel font-bold text-sm">KS</div>
+               <span class="font-cinzel text-lg tracking-widest">KSIĘSTWO</span>
+             </div>
+             <button id="close-island" class="text-white/50 hover:text-white text-xl">&times;</button>
+          </div>
+
+          <div id="island-menu-list" class="grid grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto no-scrollbar">
+            <!-- Items injected by JS -->
+          </div>
+
+          <div class="flex justify-between items-center pt-2">
+             <div class="flex bg-white/10 rounded-full p-1">
+                <button onclick="switchLang('pl')" class="lang-btn-pl px-4 py-1.5 rounded-full text-xs font-bold transition-all text-white/60">PL</button>
+                <button onclick="switchLang('en')" class="lang-btn-en px-4 py-1.5 rounded-full text-xs font-bold transition-all text-white/60">EN</button>
+             </div>
+             <button onclick="openInfoModal()" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-gold hover:bg-gold hover:text-ink transition-colors">!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HERO SECTION -->
+    <div class="h-screen w-full relative flex items-center justify-center overflow-hidden">
+      <div class="absolute inset-0 bg-ink">
+          <img id="hero-img" src="" class="w-full h-full object-cover opacity-40 mix-blend-overlay" alt="Hero">
+      </div>
+      <div class="relative z-10 text-center px-6">
+          <h1 class="font-cinzel text-4xl md:text-7xl text-white font-bold tracking-[0.15em] mb-6 drop-shadow-2xl">
+            KSIĘSTWO
+            <span class="block text-gold text-2xl md:text-4xl mt-4 tracking-[0.3em] font-normal border-t border-b border-gold/30 py-4 mx-auto max-w-2xl">
+              SUSHI & RAMEN
+            </span>
+          </h1>
+          <p id="hero-subtitle" class="font-rajdhani text-gray-300 tracking-widest uppercase text-sm md:text-base max-w-lg mx-auto leading-loose pt-6 whitespace-pre-line">
+            <!-- Text injected by JS -->
+          </p>
+          <button onclick="scrollToSection('sets')" id="hero-btn" class="mt-12 px-8 py-4 border border-gold text-gold font-cinzel hover:bg-gold hover:text-ink transition-all duration-500 uppercase tracking-widest text-sm cursor-pointer">
+            Explore
+          </button>
+      </div>
+      <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gold/50 text-2xl">↓</div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content" class="relative z-10 w-full bg-white">
+      <!-- Sections injected by JS -->
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-ink text-white pt-32 pb-16 px-6">
+      <div class="max-w-4xl mx-auto text-center">
+          <div class="w-16 h-16 border border-gold text-gold flex items-center justify-center font-cinzel text-2xl mx-auto mb-10">KS</div>
+          
+          <div class="grid md:grid-cols-2 gap-12 mb-20 text-left md:text-center font-rajdhani text-gray-400">
+              <div>
+                <h5 id="footer-loc" class="text-white font-cinzel tracking-widest mb-4">LOCATION</h5>
+                <a href="https://maps.app.goo.gl/T5n17WJtzwm2L7VTA" target="_blank" rel="noopener noreferrer" class="hover:text-gold transition-colors block leading-relaxed cursor-pointer">
+                  <p>Krupówki 38A, Zakopane</p>
+                  <p id="footer-country">Poland</p>
+                </a>
+              </div>
+              <div>
+                <h5 id="footer-contact" class="text-white font-cinzel tracking-widest mb-4">CONTACT</h5>
+                <a href="tel:+48502525544" class="hover:text-gold transition-colors block mb-1 cursor-pointer">+48 502 525 544</a>
+                <a href="https://instagram.com/ksiestwosushi" target="_blank" rel="noopener noreferrer" class="hover:text-gold transition-colors block cursor-pointer">@ksiestwosushi</a>
+              </div>
+          </div>
+
+          <div class="text-[10px] text-gray-700 font-rajdhani tracking-[0.3em] uppercase border-t border-white/5 pt-10">
+            © 2024 Księstwo Sushi & Ramen. <span id="footer-copy">Cinematic Edition.</span>
+          </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ALLERGY INFO MODAL -->
+  <div id="info-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex justify-center items-center p-6 transition-all hidden opacity-0">
+    <div class="bg-paper max-w-xl w-full p-12 relative shadow-2xl border border-gold/20 transform scale-95 transition-transform duration-300" id="info-modal-content">
+      <button onclick="closeInfoModal()" class="absolute top-6 right-6 text-3xl text-gray-300 hover:text-gold transition-colors leading-none cursor-pointer">&times;</button>
+      <h2 id="modal-title" class="font-cinzel text-3xl text-ink mb-8 text-center tracking-widest">Allergy Information</h2>
+      <div id="modal-text" class="font-rajdhani text-gray-600 leading-8 text-lg mb-8 text-justify font-light"></div>
+      <div id="modal-service" class="p-4 bg-alabaster text-center text-xs text-gold-dark font-bold uppercase tracking-[0.2em] border border-gold/10"></div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
+  <script>
+    /* =========================================
+       CONFIGURATION FOR PHOTOS
+       ========================================= */
+    const PHOTOS_PATH = './images/';
+
+    /* =========================================
+       TEXT CONSTANTS
+       ========================================= */
     const UI_TEXT = {
       hero_subtitle: {
         en: "Experience the art of Japanese cuisine \n Reimagined for the modern era.",
@@ -118,16 +265,29 @@
       location_label: { en: "LOCATION", pl: "LOKALIZACJA" },
       contact_label: { en: "CONTACT", pl: "KONTAKT" },
       poland: { en: "Poland", pl: "Polska" },
-      copyright: { en: "Cinematic Edition.", pl: "Edycja Kinowa." },
-      tagline: { en: "Cinematic Dining", pl: "Kinowe Doświadczenie" }
+      copyright: { en: "Cinematic Edition.", pl: "Edycja Kinowa." }
     };
 
-    // --- DATA CONSTANTS ---
+    const ALLERGIES = {
+      title: { en: 'Allergy Information', pl: 'Informacja o alergenach' },
+      text: {
+        en: 'According to the recipe, they may contain: gluten, cucumber, oshinko, kampyo, avocado, mango, melon, lettuce, sesame seeds, Philadelphia cream cheese, mayonnaise, sauces, edible gold.',
+        pl: 'Zgodnie z recepturą mogą zawierać: gluten, ogórek, oshinko, kampyo, awokado, mango, melon, sałatę, sezam, serek philadelphia, majonez, sosy, złoto jadalne.'
+      },
+      service: {
+        en: 'We kindly inform you that we add a waiter service of 10% to the final bill.',
+        pl: 'Uprzejmie informujemy, że doliczamy serwis kelnerski w wysokości 10% do rachunku końcowego.'
+      }
+    };
+
+    /* =========================================
+       MENU DATA (LINKED TO LOCAL IMAGES)
+       ========================================= */
     const DATA = [
       {
         id: 'sets',
         title: { en: 'Sushi Sets', pl: 'Zestawy Sushi' },
-        img: 'images/zestawy.jpg', 
+        img: `${PHOTOS_PATH}MAGURO.jpg`, // Using MAGURO for Sets as it's usually premium
         desc: {
           en: 'Curated combinations of our finest rolls, perfect for experiencing a variety of flavors.',
           pl: 'Starannie dobrane kompozycje naszych najlepszych rolek, idealne do poznania różnorodności smaków.'
@@ -178,7 +338,7 @@
       {
         id: 'starters',
         title: { en: 'Starters', pl: 'Przystawki' },
-        img: 'images/sake-tataki.jpg',
+        img: `${PHOTOS_PATH}ebiten.jpg`,
         desc: {
           en: 'A selection of light and fresh starters to begin your sushi experience.',
           pl: 'Wybór lekkich i świeżych przystawek na rozpoczęcie przygody z sushi.'
@@ -209,7 +369,7 @@
       {
         id: 'soups',
         title: { en: 'Soups', pl: 'Zupy' },
-        img: 'images/ramen-zupa.jpg',
+        img: `${PHOTOS_PATH}ramen-zupa.jpg`,
         desc: {
           en: 'Traditional Japanese soups, including rich Ramen bowls with various fillings.',
           pl: 'Tradycyjne japońskie zupy, w tym bogate miski Ramenu z różnymi dodatkami.'
@@ -235,7 +395,7 @@
       {
         id: 'nigiri',
         title: { en: 'Nigiri (2 pcs)', pl: 'Nigiri (2 szt.)' },
-        img: 'images/nigiri1.jpg',
+        img: `${PHOTOS_PATH}nigiri1.jpg`,
         desc: {
           en: 'Hand-pressed rice topped with fresh fish or seafood.',
           pl: 'Ręcznie formowany ryż z slajsem świeżej ryby lub owoców morza.'
@@ -254,7 +414,7 @@
       {
         id: 'futomaki',
         title: { en: 'Futomaki (4 pcs)', pl: 'Futomaki (4 szt.)' },
-        img: 'images/futomaki.jpg',
+        img: `${PHOTOS_PATH}futomaki.jpg`,
         desc: {
           en: 'Thick, traditional rolls with nori on the outside.',
           pl: 'Grube, tradycyjne rolki z nori na zewnątrz.'
@@ -273,7 +433,7 @@
       {
         id: 'uramaki',
         title: { en: 'Uramaki & Tempura (8 pcs)', pl: 'Uramaki & Tempura (8 szt.)' },
-        img: 'images/tempura.jpg',
+        img: `${PHOTOS_PATH}tempura.jpg`,
         desc: {
           en: 'Our selection of Uramaki (inside-out rolls) and crispy Tempura Uramaki.',
           pl: 'Nasz wybór Uramaki (rolek ryżem na zewnątrz) oraz chrupiących Uramaki w Tempurze.'
@@ -306,7 +466,7 @@
       {
         id: 'oyakomaki',
         title: { en: 'Oyakomaki (2 pcs)', pl: 'Oyakomaki (2 szt.)' },
-        img: 'images/oyakomaki.jpg',
+        img: `${PHOTOS_PATH}oyakomaki.jpg`,
         desc: {
           en: 'Our specialty rolls, often wrapped in fish or avocado instead of nori.',
           pl: 'Nasze specjalne rolki, często zawijane w rybę lub awokado zamiast nori.'
@@ -320,7 +480,7 @@
       {
         id: 'sashimi',
         title: { en: 'Sashimi (9 pcs)', pl: 'Sashimi (9 szt.)' },
-        img: 'images/sashimi.jpg',
+        img: `${PHOTOS_PATH}sashimi.jpg`,
         desc: {
           en: 'Thinly sliced raw fish and seafood, served without rice.',
           pl: 'Cienko krojone slajsy surowej ryby i owoców morza, podawane bez ryżu.'
@@ -331,471 +491,305 @@
       }
     ];
 
-    const ALLERGIES = {
-      title: { en: 'Allergy Information', pl: 'Informacja o alergenach' },
-      text: {
-        en: 'According to the recipe, they may contain: gluten, cucumber, oshinko, kampyo, avocado, mango, melon, lettuce, sesame seeds, Philadelphia cream cheese, mayonnaise, sauces, edible gold.',
-        pl: 'Zgodnie z recepturą mogą zawierać: gluten, ogórek, oshinko, kampyo, awokado, mango, melon, sałatę, sezam, serek philadelphia, majonez, sosy, złoto jadalne.'
-      },
-      service: {
-        en: 'We kindly inform you that we add a waiter service of 10% to the final bill.',
-        pl: 'Uprzejmie informujemy, że doliczamy serwis kelnerski w wysokości 10% do rachunku końcowego.'
+    /* =========================================
+       LOGIC & INTERACTIVITY
+       ========================================= */
+    let currentLang = 'pl';
+    let isMenuExpanded = false;
+
+    // PROTECTION: Disable right click and developer shortcuts
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('keydown', (e) => {
+      // F12, Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+Shift+J, Ctrl+U
+      if (e.key === 'F12' || 
+         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+         (e.ctrlKey && e.key === 'U')) {
+         e.preventDefault();
       }
-    };
+    });
 
-    // --- COMPONENTS ---
+    function init() {
+      // Intro sequence
+      setTimeout(() => {
+        document.getElementById('intro').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('intro').style.display = 'none';
+            const langSel = document.getElementById('lang-select');
+            langSel.style.pointerEvents = 'auto';
+            langSel.style.opacity = '1';
+        }, 1000);
+      }, 1500);
 
-    // 1. Dynamic Island
-    const DynamicIsland = ({ lang, setLang, onOpenInfo }) => {
-      const [expanded, setExpanded] = useState(false);
-      const [scrolled, setScrolled] = useState(false);
-
-      useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 100);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-      }, []);
-
-      return (
-        <div 
-          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center"
-          onMouseEnter={() => setExpanded(true)}
-          onMouseLeave={() => setExpanded(false)}
-        >
-          <div 
-            className={`bg-ink/90 backdrop-blur-xl text-white shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden flex flex-col ${
-              expanded ? 'w-[90vw] max-w-[500px] rounded-[32px] p-6' : 'w-[140px] h-[44px] rounded-full cursor-pointer hover:w-[160px] hover:scale-105'
-            }`}
-            onClick={() => !expanded && setExpanded(true)}
-          >
-            {/* Collapsed */}
-            {!expanded && (
-              <div className="w-full h-full flex items-center justify-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-gold animate-pulse"></div>
-                <span className="font-cinzel font-bold text-xs tracking-widest text-gold">MENU</span>
-              </div>
-            )}
-
-            {/* Expanded */}
-            <div className={`flex flex-col gap-6 w-full transition-opacity duration-300 ${expanded ? 'opacity-100 delay-100' : 'opacity-0 hidden'}`}>
-              
-              <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                 <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center font-cinzel font-bold text-sm">KS</div>
-                   <span className="font-cinzel text-lg tracking-widest">KSIĘSTWO</span>
-                 </div>
-                 <button onClick={(e) => { e.stopPropagation(); setExpanded(false); }} className="text-white/50 hover:text-white">&times;</button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto no-scrollbar">
-                {DATA.map(s => (
-                  <button 
-                    key={s.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' });
-                      setExpanded(false);
-                    }}
-                    className="text-left px-4 py-3 rounded-xl bg-white/5 hover:bg-gold/20 hover:text-gold transition-colors font-rajdhani text-sm uppercase tracking-wider"
-                  >
-                    {s.title[lang]}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex justify-between items-center pt-2">
-                 <div className="flex bg-white/10 rounded-full p-1">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setLang('pl'); }}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${lang === 'pl' ? 'bg-gold text-ink' : 'text-white/60'}`}
-                    >PL</button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setLang('en'); }}
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${lang === 'en' ? 'bg-gold text-ink' : 'text-white/60'}`}
-                    >EN</button>
-                 </div>
-                 <button 
-                   onClick={(e) => { e.stopPropagation(); onOpenInfo(); setExpanded(false); }}
-                   className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-gold hover:bg-gold hover:text-ink transition-colors"
-                 >!</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    // 2. Menu Components
-    // Accordion style for Sets
-    const MenuItemRow = ({ item, lang, isOpen, onToggle }) => {
-      // Logic for individual image display removed.
-      return (
-        <div className="border-b border-gray-200 last:border-0">
-          <div 
-            onClick={onToggle}
-            className="flex items-center justify-between py-6 cursor-pointer group hover:pl-4 transition-all duration-300"
-          >
-            <div className="flex flex-col">
-               <span className={`font-cinzel text-xl md:text-2xl transition-colors duration-300 ${isOpen ? 'text-gold-dark font-bold' : 'text-ink group-hover:text-gold-dark'}`}>
-                 {item.name[lang]}
-               </span>
-            </div>
-            <div className="flex items-center gap-4">
-               <span className="font-rajdhani font-bold text-gold-dark text-lg md:text-xl">{item.price}</span>
-               <span className={`text-gray-300 transform transition-transform duration-500 ${isOpen ? 'rotate-180 text-gold' : 'rotate-0'}`}>▼</span>
-            </div>
-          </div>
-
-          <div 
-            className={`overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${isOpen ? 'max-h-[500px] opacity-100 pb-8' : 'max-h-0 opacity-0'}`}
-          >
-             <div className="flex flex-col items-start pt-2 px-4 border-l-2 border-gold/30 ml-2">
-                <h4 className="font-cinzel text-gold text-xs tracking-[0.2em] uppercase mb-3 inline-block">
-                  {UI_TEXT.description_label[lang]}
-                </h4>
-                <p className="font-rajdhani text-ink text-lg md:text-xl leading-relaxed whitespace-pre-line">
-                  {item.desc[lang]}
-                </p>
-             </div>
-          </div>
-        </div>
-      );
-    };
-
-    // Simple style for everything else
-    const MenuItemSimple = ({ item, lang }) => (
-      <div className="py-6 border-b border-gray-100 last:border-0 group hover:bg-gray-50/50 transition-colors px-4 -mx-4 rounded-xl">
-        <div className="flex justify-between items-baseline gap-4 mb-2">
-           <h3 className="font-cinzel text-xl text-ink font-semibold group-hover:text-gold-dark transition-colors">
-             {item.name[lang]}
-           </h3>
-           <span className="font-rajdhani font-bold text-gold-dark text-lg whitespace-nowrap">
-             {item.price}
-           </span>
-        </div>
-        <p className="font-rajdhani text-gray-500 text-base leading-relaxed max-w-3xl">
-          {item.desc[lang]}
-        </p>
-      </div>
-    );
-
-    const MenuSection = ({ data, lang, index }) => {
-      const [openItemId, setOpenItemId] = useState(null);
-      const toggleItem = (idx) => setOpenItemId(openItemId === idx ? null : idx);
+      // Initialize Hero Image (Using the image from the first section)
+      document.getElementById('hero-img').src = DATA[0].img;
       
-      const isSets = data.id === 'sets';
+      // Setup Dynamic Island Listeners
+      const island = document.getElementById('island');
+      const container = document.getElementById('dynamic-island-container');
+      const closeBtn = document.getElementById('close-island');
 
-      return (
-        <section id={data.id} className="mb-0 w-full bg-white relative">
-          <div className="w-full h-[60vh] md:h-[80vh] relative flex items-center justify-center overflow-hidden">
-            <div 
-               className="absolute inset-0 parallax-bg"
-               style={{ backgroundImage: `url(${data.img || 'https://picsum.photos/1920/1080'})` }}
-            ></div>
-            <div className="absolute inset-0 bg-black/40"></div>
-            
-            <div className="relative z-10 text-center text-white px-4 animate-fade-in">
-               <span className="block font-cinzel text-gold text-lg md:text-xl tracking-[0.4em] mb-4">0{index + 1}</span>
-               <h2 className="font-cinzel text-5xl md:text-8xl font-bold tracking-widest uppercase mb-6 drop-shadow-lg">
-                 {data.title[lang]}
-               </h2>
-               <p className="font-rajdhani text-lg md:text-2xl max-w-2xl mx-auto text-gray-200 font-light">
-                 {data.desc[lang]}
-               </p>
-               {data.note && (
-                 <div className="mt-8 inline-block bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 text-sm font-rajdhani tracking-wide">
-                   ℹ {data.note[lang]}
-                 </div>
-               )}
-            </div>
-          </div>
+      island.addEventListener('click', (e) => {
+        if(!isMenuExpanded) toggleMenu(true);
+      });
 
-          <div className="max-w-5xl mx-auto px-6 py-20 md:py-32 bg-white relative -mt-10 rounded-t-3xl shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.1)] z-20">
-             {data.isSplit ? (
-               <div className="space-y-20">
-                 <div>
-                   <h3 className="text-center font-cinzel text-2xl text-gold mb-12 tracking-widest">{UI_TEXT.uramaki_title[lang]}</h3>
-                   <div className="flex flex-col">
-                     {data.items.map((item, i) => (
-                       isSets ? (
-                         <MenuItemRow 
-                           key={`l-${i}`} 
-                           item={item} 
-                           lang={lang} 
-                           isOpen={openItemId === i} 
-                           onToggle={() => toggleItem(i)} 
-                         />
-                       ) : (
-                         <MenuItemSimple key={`l-${i}`} item={item} lang={lang} />
-                       )
-                     ))}
-                   </div>
-                 </div>
-                 <div>
-                   <h3 className="text-center font-cinzel text-2xl text-gold mb-12 tracking-widest">{UI_TEXT.tempura_title[lang]}</h3>
-                   <div className="flex flex-col">
-                     {data.itemsRight?.map((item, i) => {
-                       const idx = i + 1000;
-                       return isSets ? (
-                        <MenuItemRow 
-                          key={`r-${i}`} 
-                          item={item} 
-                          lang={lang} 
-                          isOpen={openItemId === idx} 
-                          onToggle={() => toggleItem(idx)} 
-                        />
-                       ) : (
-                        <MenuItemSimple key={`r-${i}`} item={item} lang={lang} />
-                       )
-                     })}
-                   </div>
-                 </div>
-               </div>
-             ) : (
-               <div className="flex flex-col">
-                  {data.items.map((item, i) => (
-                    isSets ? (
-                      <MenuItemRow 
-                        key={i} 
-                        item={item} 
-                        lang={lang} 
-                        isOpen={openItemId === i} 
-                        onToggle={() => toggleItem(i)} 
-                      />
-                    ) : (
-                      <MenuItemSimple key={i} item={item} lang={lang} />
-                    )
-                  ))}
-               </div>
-             )}
-          </div>
-        </section>
-      );
-    };
+      island.addEventListener('mouseenter', () => {
+         if(!isMenuExpanded) {
+             island.classList.add('w-[160px]', 'scale-105');
+         }
+      });
+      island.addEventListener('mouseleave', () => {
+         if(!isMenuExpanded) {
+             island.classList.remove('w-[160px]', 'scale-105');
+         }
+      });
 
-    // 3. Intro & Selection
-    const Intro = ({ onComplete }) => {
-      const [opacity, setOpacity] = useState(1);
-      const [mounted, setMounted] = useState(true);
-      const hasRun = useRef(false);
-
-      useEffect(() => {
-        if (hasRun.current) return;
-        hasRun.current = true;
-
-        const timer = setTimeout(() => {
-          setOpacity(0);
-          setTimeout(() => {
-            setMounted(false);
-            onComplete();
-          }, 800); 
-        }, 1500);
-        return () => clearTimeout(timer);
-      }, [onComplete]);
-
-      if (!mounted) return null;
-
-      return (
-        <div 
-          className="fixed inset-0 z-[9999] bg-ink flex flex-col items-center justify-center transition-opacity duration-1000"
-          style={{ opacity }}
-        >
-          <div className="relative text-center p-8 flex flex-col items-center">
-            <h1 className="font-cinzel text-6xl md:text-9xl text-white font-bold tracking-[0.2em] mb-6 animate-slide-up">
-              KS
-            </h1>
-            <div className="h-[2px] bg-gold mb-6 animate-grow-line"></div>
-            <div className="text-gold uppercase tracking-[0.5em] font-rajdhani text-sm animate-fade-in" style={{animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards'}}>
-              CINEMATIC DINING
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    const LanguageSelection = ({ onSelect }) => {
-      const [opacity, setOpacity] = useState(0);
-      
-      useEffect(() => {
-        // Fade in
-        setTimeout(() => setOpacity(1), 50);
-      }, []);
-
-      const handleSelect = (l) => {
-        setOpacity(0);
-        setTimeout(() => onSelect(l), 500);
-      };
-
-      return (
-        <div 
-          className="fixed inset-0 z-[9990] bg-ink flex flex-col items-center justify-center transition-opacity duration-700"
-          style={{ opacity }}
-        >
-          <div className="relative z-10 text-center p-8 w-full max-w-lg flex flex-col items-center">
-             <div className="w-16 h-16 border border-gold text-gold flex items-center justify-center font-cinzel text-xl mx-auto mb-16 animate-fade-in">KS</div>
-             
-             <div className="flex gap-8 justify-center w-full">
-               <button 
-                 onClick={() => handleSelect('pl')}
-                 className="w-40 h-14 border border-white/20 hover:border-gold hover:bg-gold/10 transition-all duration-500 flex items-center justify-center group"
-               >
-                 <span className="font-rajdhani text-white text-xl tracking-[0.2em] group-hover:text-gold transition-colors">PL</span>
-               </button>
-
-               <button 
-                 onClick={() => handleSelect('en')}
-                 className="w-40 h-14 border border-white/20 hover:border-gold hover:bg-gold/10 transition-all duration-500 flex items-center justify-center group"
-               >
-                 <span className="font-rajdhani text-white text-xl tracking-[0.2em] group-hover:text-gold transition-colors">EN</span>
-               </button>
-             </div>
-          </div>
-        </div>
-      );
-    };
-
-    const App = () => {
-      // States: 'intro' -> 'lang' -> 'app'
-      const [phase, setPhase] = useState('intro');
-      const [lang, setLang] = useState('pl');
-      const [showInfo, setShowInfo] = useState(false);
-
-      useEffect(() => {
-        if (phase === 'app') {
-            document.body.style.backgroundColor = '#F0EFEA'; // Alabaster
-            document.documentElement.classList.remove('overflow-hidden');
-        } else {
-            document.body.style.backgroundColor = '#0F0F0F'; // Dark
-            document.documentElement.classList.add('overflow-hidden');
-        }
-      }, [phase]);
-
-      const handleIntroComplete = () => {
-          setPhase('lang');
-      };
-
-      const handleLangSelect = (l) => {
-          setLang(l);
-          setPhase('app');
-      };
-
-      return (
-        <React.Fragment>
-          {phase === 'intro' && <Intro onComplete={handleIntroComplete} />}
-          
-          {phase === 'lang' && <LanguageSelection onSelect={handleLangSelect} />}
-
-          {/* Main App Content */}
-          <div className={`min-h-screen bg-alabaster transition-opacity duration-1000 ${phase === 'app' ? 'opacity-100 relative' : 'opacity-0 fixed inset-0 pointer-events-none'}`}>
-            
-            {phase === 'app' && (
-             <React.Fragment>
-                <DynamicIsland lang={lang} setLang={setLang} onOpenInfo={() => setShowInfo(true)} />
-
-                {/* HERO LANDING */}
-                <div className="h-screen w-full relative flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-ink">
-                      <img 
-                        src="images/zestawy.jpg" 
-                        className="w-full h-full object-cover opacity-40 mix-blend-overlay"
-                        alt="Hero"
-                      />
-                  </div>
-                  <div className="relative z-10 text-center px-6">
-                      <h1 className="font-cinzel text-4xl md:text-7xl text-white font-bold tracking-[0.15em] mb-6 drop-shadow-2xl">
-                        KSIĘSTWO
-                        <span className="block text-gold text-2xl md:text-4xl mt-4 tracking-[0.3em] font-normal border-t border-b border-gold/30 py-4 mx-auto max-w-2xl">
-                          SUSHI & RAMEN
-                        </span>
-                      </h1>
-                      <p className="font-rajdhani text-gray-300 tracking-widest uppercase text-sm md:text-base max-w-lg mx-auto leading-loose pt-6 whitespace-pre-line">
-                        {UI_TEXT.hero_subtitle[lang]}
-                      </p>
-                      <button 
-                        onClick={() => document.getElementById('sets')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="mt-12 px-8 py-4 border border-gold text-gold font-cinzel hover:bg-gold hover:text-ink transition-all duration-500 uppercase tracking-widest text-sm"
-                      >
-                        {UI_TEXT.explore_btn[lang]}
-                      </button>
-                  </div>
-                  
-                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gold/50">
-                      ↓
-                  </div>
-                </div>
-
-                <main className="relative z-10 w-full bg-white">
-                    {DATA.map((section, idx) => (
-                      <MenuSection 
-                        key={section.id} 
-                        data={section} 
-                        lang={lang} 
-                        index={idx}
-                      />
-                    ))}
-                </main>
-
-                <footer className="bg-ink text-white pt-32 pb-16 px-6">
-                  <div className="max-w-4xl mx-auto text-center">
-                      <div className="w-16 h-16 border border-gold text-gold flex items-center justify-center font-cinzel text-2xl mx-auto mb-10">KS</div>
-                      
-                      <div className="grid md:grid-cols-2 gap-12 mb-20 text-left md:text-center font-rajdhani text-gray-400">
-                          <div>
-                            <h5 className="text-white font-cinzel tracking-widest mb-4">{UI_TEXT.location_label[lang]}</h5>
-                            <a href="https://maps.app.goo.gl/T5n17WJtzwm2L7VTA" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors block leading-relaxed">
-                              <p>Krupówki 38A, Zakopane</p>
-                              <p>{UI_TEXT.poland[lang]}</p>
-                            </a>
-                          </div>
-                          <div>
-                            <h5 className="text-white font-cinzel tracking-widest mb-4">{UI_TEXT.contact_label[lang]}</h5>
-                            <a href="tel:+48502525544" className="hover:text-gold transition-colors block mb-1">+48 502 525 544</a>
-                            <a href="https://instagram.com/ksiestwosushi" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors block">@ksiestwosushi</a>
-                          </div>
-                      </div>
-
-                      <div className="text-[10px] text-gray-700 font-rajdhani tracking-[0.3em] uppercase border-t border-white/5 pt-10">
-                        © 2024 Księstwo Sushi & Ramen. {UI_TEXT.copyright[lang]}
-                      </div>
-                  </div>
-                </footer>
-
-                {showInfo && (
-                  <div 
-                    className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex justify-center items-center p-6 transition-all"
-                    onClick={() => setShowInfo(false)}
-                  >
-                    <div 
-                      className="bg-paper max-w-xl w-full p-12 relative shadow-2xl border border-gold/20"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button 
-                        className="absolute top-6 right-6 text-3xl text-gray-300 hover:text-gold transition-colors leading-none"
-                        onClick={() => setShowInfo(false)}
-                      >
-                        &times;
-                      </button>
-
-                      <h2 className="font-cinzel text-3xl text-ink mb-8 text-center tracking-widest">{ALLERGIES.title[lang]}</h2>
-                      <div className="font-rajdhani text-gray-600 leading-8 text-lg mb-8 text-justify font-light">
-                        {ALLERGIES.text[lang]}
-                      </div>
-                      <div className="p-4 bg-alabaster text-center text-xs text-gold-dark font-bold uppercase tracking-[0.2em] border border-gold/10">
-                          {ALLERGIES.service[lang]}
-                      </div>
-                    </div>
-                  </div>
-                )}
-             </React.Fragment>
-            )}
-          </div>
-        </React.Fragment>
-      );
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMenu(false);
+      });
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    function setLanguage(lang) {
+      currentLang = lang;
+      
+      const langSel = document.getElementById('lang-select');
+      langSel.style.opacity = '0';
+      
+      setTimeout(() => {
+        langSel.style.display = 'none';
+        
+        // Reveal Main App
+        const app = document.getElementById('app');
+        app.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            app.classList.remove('opacity-0');
+        });
+
+        renderApp();
+      }, 700);
+    }
+
+    function switchLang(lang) {
+        currentLang = lang;
+        renderApp();
+    }
+
+    function toggleMenu(expand) {
+        isMenuExpanded = expand;
+        const island = document.getElementById('island');
+        const collapsed = document.getElementById('island-collapsed');
+        const expanded = document.getElementById('island-expanded');
+
+        if(expand) {
+            island.classList.remove('w-[140px]', 'h-[44px]', 'rounded-full', 'hover:w-[160px]', 'hover:scale-105', 'cursor-pointer');
+            island.classList.add('w-[90vw]', 'max-w-[500px]', 'rounded-[32px]', 'cursor-default');
+            
+            collapsed.classList.add('opacity-0', 'pointer-events-none');
+            
+            expanded.classList.remove('hidden');
+            setTimeout(() => {
+                expanded.classList.remove('opacity-0');
+            }, 100);
+        } else {
+            expanded.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                expanded.classList.add('hidden');
+                
+                island.classList.remove('w-[90vw]', 'max-w-[500px]', 'rounded-[32px]', 'cursor-default');
+                island.classList.add('w-[140px]', 'h-[44px]', 'rounded-full', 'hover:w-[160px]', 'hover:scale-105', 'cursor-pointer');
+                
+                collapsed.classList.remove('opacity-0', 'pointer-events-none');
+            }, 300);
+        }
+    }
+
+    function scrollToSection(id) {
+        const el = document.getElementById(id);
+        if(el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+            if(isMenuExpanded) toggleMenu(false);
+        }
+    }
+
+    function openInfoModal() {
+        const modal = document.getElementById('info-modal');
+        const content = document.getElementById('info-modal-content');
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+        });
+        
+        // Populate modal
+        document.getElementById('modal-title').textContent = ALLERGIES.title[currentLang];
+        document.getElementById('modal-text').textContent = ALLERGIES.text[currentLang];
+        document.getElementById('modal-service').textContent = ALLERGIES.service[currentLang];
+    }
+
+    function closeInfoModal() {
+        const modal = document.getElementById('info-modal');
+        const content = document.getElementById('info-modal-content');
+        modal.classList.add('opacity-0');
+        content.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    // Toggle Accordion Item
+    function toggleItem(el) {
+        const content = el.nextElementSibling;
+        const arrow = el.querySelector('.arrow');
+        const title = el.querySelector('.item-title');
+        
+        const isOpen = content.style.maxHeight;
+
+        // Note: For 'Sets' we toggle max-height to show/hide content
+        if (isOpen) {
+            content.style.maxHeight = null;
+            content.classList.remove('opacity-100', 'pb-8');
+            content.classList.add('opacity-0');
+            arrow.classList.remove('rotate-180', 'text-gold');
+            title.classList.remove('text-gold-dark', 'font-bold');
+        } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            content.classList.remove('opacity-0');
+            content.classList.add('opacity-100', 'pb-8');
+            arrow.classList.add('rotate-180', 'text-gold');
+            title.classList.add('text-gold-dark', 'font-bold');
+        }
+    }
+
+    function renderApp() {
+        // Update Static Texts
+        document.getElementById('hero-subtitle').textContent = UI_TEXT.hero_subtitle[currentLang];
+        document.getElementById('hero-btn').textContent = UI_TEXT.explore_btn[currentLang];
+        document.getElementById('footer-loc').textContent = UI_TEXT.location_label[currentLang];
+        document.getElementById('footer-contact').textContent = UI_TEXT.contact_label[currentLang];
+        document.getElementById('footer-country').textContent = UI_TEXT.poland[currentLang];
+        document.getElementById('footer-copy').textContent = UI_TEXT.copyright[currentLang];
+
+        // Update Lang Buttons
+        const plBtns = document.querySelectorAll('.lang-btn-pl');
+        const enBtns = document.querySelectorAll('.lang-btn-en');
+        if(currentLang === 'pl') {
+            plBtns.forEach(b => { b.classList.add('bg-gold', 'text-ink'); b.classList.remove('text-white/60'); });
+            enBtns.forEach(b => { b.classList.remove('bg-gold', 'text-ink'); b.classList.add('text-white/60'); });
+        } else {
+            enBtns.forEach(b => { b.classList.add('bg-gold', 'text-ink'); b.classList.remove('text-white/60'); });
+            plBtns.forEach(b => { b.classList.remove('bg-gold', 'text-ink'); b.classList.add('text-white/60'); });
+        }
+
+        // Update Island Menu List
+        const islandList = document.getElementById('island-menu-list');
+        islandList.innerHTML = DATA.map(s => `
+            <button onclick="scrollToSection('${s.id}')" class="text-left px-4 py-3 rounded-xl bg-white/5 hover:bg-gold/20 hover:text-gold transition-colors font-rajdhani text-sm uppercase tracking-wider text-white">
+                ${s.title[currentLang]}
+            </button>
+        `).join('');
+
+        // Render Main Sections
+        const main = document.getElementById('main-content');
+        main.innerHTML = DATA.map((section, idx) => {
+            const isSets = section.id === 'sets'; // Accordion style for sets
+            
+            const renderItem = (item) => {
+                if(isSets) {
+                    return `
+                    <div class="border-b border-gray-200 last:border-0">
+                        <div onclick="toggleItem(this)" class="flex items-center justify-between py-6 cursor-pointer group hover:pl-4 transition-all duration-300">
+                            <div class="flex flex-col">
+                                <span class="item-title font-cinzel text-xl md:text-2xl transition-colors duration-300 text-ink group-hover:text-gold-dark">
+                                    ${item.name[currentLang]}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="font-rajdhani font-bold text-gold-dark text-lg md:text-xl">${item.price}</span>
+                                <span class="arrow text-gray-300 transform transition-transform duration-500">▼</span>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] max-h-0 opacity-0">
+                            <div class="flex flex-col items-start pt-2 px-4 border-l-2 border-gold/30 ml-2">
+                                <h4 class="font-cinzel text-gold text-xs tracking-[0.2em] uppercase mb-3 inline-block">
+                                    ${UI_TEXT.description_label[currentLang]}
+                                </h4>
+                                <p class="font-rajdhani text-ink text-lg md:text-xl leading-relaxed whitespace-pre-line">
+                                    ${item.desc[currentLang]}
+                                </p>
+                            </div>
+                        </div>
+                    </div>`;
+                } else {
+                    return `
+                    <div class="py-6 border-b border-gray-100 last:border-0 group hover:bg-gray-50/50 transition-colors px-4 -mx-4 rounded-xl">
+                        <div class="flex justify-between items-baseline gap-4 mb-2">
+                            <h3 class="font-cinzel text-xl text-ink font-semibold group-hover:text-gold-dark transition-colors">
+                                ${item.name[currentLang]}
+                            </h3>
+                            <span class="font-rajdhani font-bold text-gold-dark text-lg whitespace-nowrap">
+                                ${item.price}
+                            </span>
+                        </div>
+                        <p class="font-rajdhani text-gray-500 text-base leading-relaxed max-w-3xl">
+                            ${item.desc[currentLang]}
+                        </p>
+                    </div>`;
+                }
+            };
+
+            let contentHTML = '';
+            if(section.isSplit) {
+                contentHTML = `
+                <div class="space-y-20">
+                    <div>
+                        <h3 class="text-center font-cinzel text-2xl text-gold mb-12 tracking-widest">${UI_TEXT.uramaki_title[currentLang]}</h3>
+                        <div class="flex flex-col">
+                            ${section.items.map(renderItem).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-center font-cinzel text-2xl text-gold mb-12 tracking-widest">${UI_TEXT.tempura_title[currentLang]}</h3>
+                        <div class="flex flex-col">
+                            ${section.itemsRight ? section.itemsRight.map(renderItem).join('') : ''}
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                contentHTML = `<div class="flex flex-col">${section.items.map(renderItem).join('')}</div>`;
+            }
+
+            return `
+            <section id="${section.id}" class="mb-0 w-full bg-white relative">
+                <div class="w-full h-[60vh] md:h-[80vh] relative flex items-center justify-center overflow-hidden">
+                    <div class="absolute inset-0 parallax-bg" style="background-image: url('${section.img}')"></div>
+                    <div class="absolute inset-0 bg-black/40"></div>
+                    
+                    <div class="relative z-10 text-center text-white px-4">
+                        <span class="block font-cinzel text-gold text-lg md:text-xl tracking-[0.4em] mb-4">0${idx + 1}</span>
+                        <h2 class="font-cinzel text-5xl md:text-8xl font-bold tracking-widest uppercase mb-6 drop-shadow-lg">
+                            ${section.title[currentLang]}
+                        </h2>
+                        <p class="font-rajdhani text-lg md:text-2xl max-w-2xl mx-auto text-gray-200 font-light">
+                            ${section.desc[currentLang]}
+                        </p>
+                        ${section.note ? `
+                        <div class="mt-8 inline-block bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 text-sm font-rajdhani tracking-wide">
+                            ℹ ${section.note[currentLang]}
+                        </div>` : ''}
+                    </div>
+                </div>
+
+                <div class="max-w-5xl mx-auto px-6 py-20 md:py-32 bg-white relative -mt-10 rounded-t-3xl shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.1)] z-20">
+                    ${contentHTML}
+                </div>
+            </section>
+            `;
+        }).join('');
+    }
+
+    // Init
+    window.onload = init;
   </script>
-<script type="module" src="/index.tsx"></script>
 </body>
 </html>
