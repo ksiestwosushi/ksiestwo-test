@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pl" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <title>Księstwo Sushi & Ramen — ROYAL</title>
+  
+  <!-- FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- TAILWIND -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            rajdhani: ['Rajdhani', 'sans-serif'],
+          },
+          colors: {
+            paper: '#ffffff',
+            alabaster: '#F0EFEA',
+            gold: '#C5A028',
+            'gold-light': '#F3E5AB',
+            'gold-dark': '#8A7019',
+            ink: '#0F0F0F',
+            smoke: '#4a4a4a',
+          },
+          animation: {
+            'fade-in': 'fadeIn 1.0s ease-out forwards',
+            'slide-up': 'slideUp 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'grow-line': 'growLine 1.0s ease-out forwards',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+            growLine: {
+              '0%': { width: '0' },
+              '100%': { width: '100px' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- REACT & BABEL -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      background-color: #0F0F0F; /* Default to dark to match intro/lang */
+      color: #0F0F0F;
+      overflow-x: hidden;
+    }
+    
+    /* Hide scrollbar for Dynamic Island horizontal scroll */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Parallax Effect Utility */
+    .parallax-bg {
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    @media (pointer: coarse) {
+        .parallax-bg {
+            background-attachment: scroll; /* Disable fixed bg on mobile for performance */
+        }
+    }
+  </style>
+<link rel="stylesheet" href="/index.css">
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- UI TRANSLATIONS ---
+    const UI_TEXT = {
+      hero_subtitle: {
+        en: "Experience the art of Japanese cuisine \n Reimagined for the modern era.",
+        pl: "Poznaj sztukę japońskiej kuchni \n Stworzoną na nowo dla współczesności."
+      },
+      explore_btn: { en: "Explore Menu", pl: "Odkryj Menu" },
+      description_label: { en: "Description", pl: "Opis" },
+      uramaki_title: { en: "URAMAKI", pl: "URAMAKI" },
+      tempura_title: { en: "TEMPURA", pl: "W TEMPURZE" },
+      location_label: { en: "LOCATION", pl: "LOKALIZACJA" },
+      contact_label: { en: "CONTACT", pl: "KONTAKT" },
+      poland: { en: "Poland", pl: "Polska" },
+      copyright: { en: "Cinematic Edition.", pl: "Edycja Kinowa." },
+      tagline: { en: "Cinematic Dining", pl: "Kinowe Doświadczenie" }
+    };
+
+    // --- DATA CONSTANTS ---
+    const DATA = [
+      {
+        id: 'sets',
+        title: { en: 'Sushi Sets', pl: 'Zestawy Sushi' },
+        img: 'images/zestawy.jpg', 
+        desc: {
+          en: 'Curated combinations of our finest rolls, perfect for experiencing a variety of flavors.',
+          pl: 'Starannie dobrane kompozycje naszych najlepszych rolek, idealne do poznania różnorodności smaków.'
+        },
+        items: [
+          {
+            name: { en: 'OTO (16 pcs)', pl: 'OTO (16 szt.)' },
+            price: '90 zł',
+            desc: {
+              en: '4x Gold California (surimi wrapped in raw salmon)\n4x Avocado Kani (surimi wrapped in avocado)\n4x Ohio Irygoma (butterfish rolled in black sesame)\n4x Ebi Ten (shrimp tempura)',
+              pl: '4x Gold California (surimi owijane surowym łososiem)\n4x Awokado Kani (surimi owijane awokado)\n4x Ohio Irygoma (ryba maślana obtoczona w czarnym sezamie)\n4x Ebi Ten (krewetka w tempurze)'
+            }
+          },
+          {
+            name: { en: 'AKA (22 pcs)', pl: 'AKA (22 szt.)' },
+            price: '130 zł',
+            desc: {
+              en: '4x Rainbow (surimi wrapped in variety of raw fish)\n4x Mango Sake (raw salmon wrapped in mango)\n4x Ebi Ten (shrimp tempura)\n4x Avocado Kani (surimi wrapped in avocado)\n6x Futomaki Ohio Yaki (baked butterfish)',
+              pl: '4x Rainbow (surimi owijane wachlarzem surowych ryb)\n4x Mango Sake (surowy łosoś owijany mango)\n4x Ebi Ten (krewetka w tempurze)\n4x Awokado Kani (surimi owijane awokado)\n6x Futomaki Ohio Yaki (pieczona ryba maślana)'
+            }
+          },
+          {
+            name: { en: 'AKASHI (38 pcs)', pl: 'AKASHI (38 szt.)' },
+            price: '210 zł',
+            desc: {
+              en: '8x Rainbow (surimi wrapped in variety of raw fish)\n8x Goma Sake Yaki (baked salmon topped with wakame)\n4x Ebi Ten (shrimp tempura)\n6x Sake Philadelphia (salmon with cream cheese)\n6x Ohio Ten (butterfish tempura)\n6x Maguro Spice (spicy tuna)',
+              pl: '8x Rainbow (surimi owijane wachlarzem surowych ryb)\n8x Goma Sake Yaki (pieczony łosoś obłożony wakame)\n4x Ebi Ten (krewetka w tempurze)\n6x Sake Philadelphia (łosoś z serkiem philadelphia)\n6x Ohio Ten (maślana w tempurze)\n6x Maguro Spice (pikantny tuńczyk)'
+            }
+          },
+          {
+            name: { en: 'KUROISO (52 pcs)', pl: 'KUROISO (52 szt.)' },
+            price: '290 zł',
+            desc: {
+              en: '8x Rainbow (surimi wrapped in variety of raw fish)\n8x Tempura Ohio (butterfish tempura)\n8x Goma Yaki Sake (salmon topped with wakame)\n8x Kegon (salmon wrapped in eel)\n8x Ebi Ten Ohio Tataki (shrimp tempura topped with butterfish tartare)\n6x Sake Philadelphia (salmon with cream cheese)\n6x Suzuki Yaki (spicy zander)',
+              pl: '8x Rainbow (surimi owijane wachlarzem surowych ryb)\n8x Tempura Ohio (maślana w tempurze)\n8x Goma Yaki Sake (łosoś obłożony wakame)\n8x Kegon (łosoś owijany węgorzem)\n8x Ebi Ten Ohio Tataki (krewetka w tempurze obłożona tatarem z maślanej)\n6x Sake Philadelphia (łosoś z serkiem philadelphia)\n6x Suzuki Yaki (pikantny sandacz)'
+            }
+          },
+          {
+            name: { en: 'BIWA (60 pcs)', pl: 'BIWA (60 szt.)' },
+            price: '340 zł',
+            desc: {
+              en: '8x Gold California (surimi wrapped in salmon)\n8x Ohio Ten Nashi (tempura butterfish wrapped in Japanese pear)\n8x Ebi Ten Avocado (tempura shrimp wrapped in avocado)\n8x Kegon (salmon wrapped in grilled eel)\n8x Tempura Cali Rae (spicy sea bream in tempura)\n6x Maguro Philadelphia (tuna with cream cheese)\n6x Ohio Spice Mango (spicy butterfish with mango)\n8x Nigiri (2x salmon, 2x tuna, 2x butterfish, 2x shrimp)',
+              pl: '8x Gold California (surimi owijane łososiem)\n8x Ohio Ten Nashi (maślana w tempurze owijana japońską gruszką)\n8x Ebi Ten Avocado (krewetka w tempurze owijana awokado)\n8x Kegon (łosoś owijany węgorzem)\n8x Tempura Cali Rae (pikantna dorada cała w tempurze)\n6x Maguro Philadelphia (tuńczyk z serkiem philadelphia)\n6x Ohio Spice Mango (pikantna maślana z mango)\n8x Nigiri (2x łosoś, 2x tuńczyk, 2x maślana, 2x krewetka)'
+            }
+          }
+        ]
+      },
+      {
+        id: 'starters',
+        title: { en: 'Starters', pl: 'Przystawki' },
+        img: 'images/sake-tataki.jpg',
+        desc: {
+          en: 'A selection of light and fresh starters to begin your sushi experience.',
+          pl: 'Wybór lekkich i świeżych przystawek na rozpoczęcie przygody z sushi.'
+        },
+        items: [
+          {
+            name: { en: 'Goma Wakame', pl: 'Goma Wakame' },
+            price: '20 zł',
+            desc: { en: 'seaweed salad', pl: 'sałatka z wodorostów' }
+          },
+          {
+            name: { en: 'Ebi Ten (3 pcs)', pl: 'Ebi Ten (3 szt.)' },
+            price: '30 zł',
+            desc: { en: 'shrimp tempura served with ponzu sauce', pl: 'krewetki w tempurze z sosem ponzu' }
+          },
+          {
+            name: { en: 'Sake Tataki', pl: 'Sake Tataki' },
+            price: '50 zł',
+            desc: { en: 'salmon tartare', pl: 'tatar z łososia' }
+          },
+          {
+            name: { en: 'Maguro Tataki', pl: 'Maguro Tataki' },
+            price: '55 zł',
+            desc: { en: 'tuna tartare', pl: 'tatar z tuńczyka' }
+          }
+        ]
+      },
+      {
+        id: 'soups',
+        title: { en: 'Soups', pl: 'Zupy' },
+        img: 'images/ramen-zupa.jpg',
+        desc: {
+          en: 'Traditional Japanese soups, including rich Ramen bowls with various fillings.',
+          pl: 'Tradycyjne japońskie zupy, w tym bogate miski Ramenu z różnymi dodatkami.'
+        },
+        items: [
+          {
+            name: { en: 'Ramen Chicken', pl: 'Ramen Chicken' },
+            price: '48 zł',
+            desc: { en: 'flavorful broth with chicken, vegetables, and ramen noodles', pl: 'bulion z warzywami, mięsem i makaronem ramen' }
+          },
+          {
+            name: { en: 'Ramen Beef', pl: 'Ramen Beef' },
+            price: '55 zł',
+            desc: { en: 'beef ramen', pl: 'ramen wołowy' }
+          },
+          {
+            name: { en: 'Seafood Udon', pl: 'Seafood Udon' },
+            price: '58 zł',
+            desc: { en: 'Spicy seafood soup with vegetables and udon noodles', pl: 'Ostra zupa z owocami morza, warzywami i makaronem udon' }
+          }
+        ]
+      },
+      {
+        id: 'nigiri',
+        title: { en: 'Nigiri (2 pcs)', pl: 'Nigiri (2 szt.)' },
+        img: 'images/nigiri1.jpg',
+        desc: {
+          en: 'Hand-pressed rice topped with fresh fish or seafood.',
+          pl: 'Ręcznie formowany ryż z slajsem świeżej ryby lub owoców morza.'
+        },
+        items: [
+          { name: { en: 'Sake', pl: 'Sake' }, price: '26 zł', desc: { en: 'salmon', pl: 'łosoś' } },
+          { name: { en: 'Ohio', pl: 'Ohio' }, price: '25 zł', desc: { en: 'butterfish', pl: 'ryba maślana' } },
+          { name: { en: 'Maguro', pl: 'Maguro' }, price: '30 zł', desc: { en: 'tuna', pl: 'tuńczyk' } },
+          { name: { en: 'Unagi', pl: 'Unagi' }, price: '30 zł', desc: { en: 'eel', pl: 'węgorz' } },
+          { name: { en: 'Hotate', pl: 'Hotate' }, price: '32 zł', desc: { en: 'scallops', pl: 'małże św. Jakuba' } },
+          { name: { en: 'Tako', pl: 'Tako' }, price: '30 zł', desc: { en: 'octopus', pl: 'ośmiornica' } },
+          { name: { en: 'Ika', pl: 'Ika' }, price: '30 zł', desc: { en: 'squid', pl: 'kalmar' } },
+          { name: { en: 'Ebi', pl: 'Ebi' }, price: '30 zł', desc: { en: 'shrimp', pl: 'krewetka' } }
+        ]
+      },
+      {
+        id: 'futomaki',
+        title: { en: 'Futomaki (4 pcs)', pl: 'Futomaki (4 szt.)' },
+        img: 'images/futomaki.jpg',
+        desc: {
+          en: 'Thick, traditional rolls with nori on the outside.',
+          pl: 'Grube, tradycyjne rolki z nori na zewnątrz.'
+        },
+        items: [
+          { name: { en: 'Sake Philadelphia', pl: 'Sake Philadelphia' }, price: '38 zł', desc: { en: 'salmon with philadelphia cream cheese', pl: 'łosoś z serkiem philadelphia' } },
+          { name: { en: 'Maguro Negi Togarashi', pl: 'Maguro Negi Togarashi' }, price: '42 zł', desc: { en: 'tuna with spicy leek', pl: 'tuńczyk z porem na ostro' } },
+          { name: { en: 'Ohio Spice Mango', pl: 'Ohio Spice Mango' }, price: '40 zł', desc: { en: 'spicy butterfish with mango', pl: 'pikantna ryba maślana z mango' } },
+          { name: { en: 'Ebi Spicy', pl: 'Ebi Spicy' }, price: '40 zł', desc: { en: 'spicy shrimp', pl: 'pikantna krewetka' } },
+          { name: { en: 'Ebi Tempura', pl: 'Ebi Tempura' }, price: '40 zł', desc: { en: 'shrimp tempura', pl: 'krewetka w tempurze' } },
+          { name: { en: 'Unagi Kabayaki', pl: 'Unagi Kabayaki' }, price: '45 zł', desc: { en: 'grilled eel with kabayaki sauce', pl: 'grillowany węgorz w sosie kabayaki' } },
+          { name: { en: 'Ika Tempura', pl: 'Ika Tempura' }, price: '48 zł', desc: { en: 'squid tempura', pl: 'kalmar w tempurze' } },
+          { name: { en: 'Veggie', pl: 'Veggie' }, price: '36 zł', desc: { en: 'vegetables', pl: 'warzywa' } }
+        ]
+      },
+      {
+        id: 'uramaki',
+        title: { en: 'Uramaki & Tempura (8 pcs)', pl: 'Uramaki & Tempura (8 szt.)' },
+        img: 'images/tempura.jpg',
+        desc: {
+          en: 'Our selection of Uramaki (inside-out rolls) and crispy Tempura Uramaki.',
+          pl: 'Nasz wybór Uramaki (rolek ryżem na zewnątrz) oraz chrupiących Uramaki w Tempurze.'
+        },
+        isSplit: true,
+        items: [
+          { name: { en: 'Sake Philadelphia', pl: 'Sake Philadelphia' }, price: '38 zł', desc: { en: 'salmon with philadelphia cream cheese', pl: 'łosoś z serkiem philadelphia' } },
+          { name: { en: 'Awokado Sake', pl: 'Awokado Sake' }, price: '42 zł', desc: { en: 'salmon wrapped in avocado', pl: 'łosoś owijany awokado' } },
+          { name: { en: 'Mango Sake', pl: 'Mango Sake' }, price: '42 zł', desc: { en: 'salmon wrapped in mango', pl: 'łosoś owijany mango' } },
+          { name: { en: 'Maguro Orange Pepper', pl: 'Maguro Orange Pepper' }, price: '45 zł', desc: { en: 'tuna with chopped leek and orange pepper', pl: 'tuńczyk z siekanym porem i orange pepper' } },
+          { name: { en: 'Ebi Ten Mamemori', pl: 'Ebi Ten Mamemori' }, price: '42 zł', desc: { en: 'shrimp tempura wrapped in soy paper', pl: 'krewetka w tempurze zawijana w papier sojowy' } },
+          { name: { en: 'Gold California', pl: 'Gold California' }, price: '40 zł', desc: { en: 'surimi wrapped in salmon', pl: 'surimi owijane łososiem' } },
+          { name: { en: 'Rainbow', pl: 'Rainbow' }, price: '48 zł', desc: { en: 'surimi wrapped in assorted fish', pl: 'surimi owijane wachlarzem ryb' } },
+          { name: { en: 'Ohio Spice Sake', pl: 'Ohio Spice Sake' }, price: '42 zł', desc: { en: 'salmon wrapped in butterfish', pl: 'łosoś owijany opalaną maślaną' } },
+          { name: { en: 'Maguro Spicy Ebi Ten', pl: 'Maguro Spicy Ebi Ten' }, price: '45 zł', desc: { en: 'shrimp tempura wrapped in seared tuna', pl: 'krewetka w tempurze owijana opalanym tuńczykiem' } },
+          { name: { en: 'Kegon', pl: 'Kegon' }, price: '45 zł', desc: { en: 'salmon wrapped in grilled eel', pl: 'łosoś owijany grillowanym węgorzem' } },
+          { name: { en: 'Sake Aburi', pl: 'Sake Aburi' }, price: '45 zł', desc: { en: 'salmon wrapped in seared spicy salmon', pl: 'łosoś owijany opalanym pikantnym łososiem' } },
+          { name: { en: 'Tobiko Ohio Ten', pl: 'Tobiko Ohio Ten' }, price: '48 zł', desc: { en: 'butterfish in tempura coated with caviar', pl: 'maślana w tempurze obtoczona kawiorem z latającej ryby' } },
+          { name: { en: 'Nashi Sake', pl: 'Nashi Sake' }, price: '45 zł', desc: { en: 'salmon wrapped in Japanese pear', pl: 'łosoś owijany japońską gruszką' } },
+          { name: { en: 'Sake Tataki Ebiten', pl: 'Sake Tataki Ebiten' }, price: '48 zł', desc: { en: 'shrimp tempura wrapped in salmon tartare', pl: 'krewetka w tempurze obłożona tatarem z łososia' } }
+        ],
+        itemsRight: [
+          { name: { en: 'Tempura Sake', pl: 'Tempura Sake' }, price: '38 zł', desc: { en: 'salmon', pl: 'łosoś' } },
+          { name: { en: 'Tempura Ohio', pl: 'Tempura Ohio' }, price: '38 zł', desc: { en: 'butterfish', pl: 'maślana' } },
+          { name: { en: 'Tempura Maguro', pl: 'Tempura Maguro' }, price: '42 zł', desc: { en: 'tuna', pl: 'tuńczyk' } },
+          { name: { en: 'Tempura Ebi', pl: 'Tempura Ebi' }, price: '40 zł', desc: { en: 'steamed shrimp', pl: 'parzona krewetka' } },
+          { name: { en: 'Tempura Unagi Kabayaki', pl: 'Tempura Unagi Kabayaki' }, price: '45 zł', desc: { en: 'grilled eel', pl: 'grillowany węgorz' } }
+        ]
+      },
+      {
+        id: 'oyakomaki',
+        title: { en: 'Oyakomaki (2 pcs)', pl: 'Oyakomaki (2 szt.)' },
+        img: 'images/oyakomaki.jpg',
+        desc: {
+          en: 'Our specialty rolls, often wrapped in fish or avocado instead of nori.',
+          pl: 'Nasze specjalne rolki, często zawijane w rybę lub awokado zamiast nori.'
+        },
+        items: [
+          { name: { en: 'Sake Ebi Tataki', pl: 'Sake Ebi Tataki' }, price: '36 zł', desc: { en: 'chopped shrimp wrapped in salmon', pl: 'siekana krewetka owijana w łososia' } },
+          { name: { en: 'Sake Ikura', pl: 'Sake Ikura' }, price: '42 zł', desc: { en: 'caviar with salmon wrapped in tuna', pl: 'kawior z łososia owijany tuńczykiem' } },
+          { name: { en: 'Maguro Sake Tataki', pl: 'Maguro Sake Tataki' }, price: '45 zł', desc: { en: 'chopped salmon wrapped in tuna', pl: 'siekany łosoś owijany tuńczykiem' } }
+        ]
+      },
+      {
+        id: 'sashimi',
+        title: { en: 'Sashimi (9 pcs)', pl: 'Sashimi (9 szt.)' },
+        img: 'images/sashimi.jpg',
+        desc: {
+          en: 'Thinly sliced raw fish and seafood, served without rice.',
+          pl: 'Cienko krojone slajsy surowej ryby i owoców morza, podawane bez ryżu.'
+        },
+        items: [
+          { name: { en: 'Mizu', pl: 'Mizu' }, price: '95 zł', desc: { en: 'slices of raw fish — salmon, tuna, butterfish', pl: 'slajsy surowej ryby — łosoś, tuńczyk, maślana' } }
+        ]
+      }
+    ];
+
+    const ALLERGIES = {
+      title: { en: 'Allergy Information', pl: 'Informacja o alergenach' },
+      text: {
+        en: 'According to the recipe, they may contain: gluten, cucumber, oshinko, kampyo, avocado, mango, melon, lettuce, sesame seeds, Philadelphia cream cheese, mayonnaise, sauces, edible gold.',
+        pl: 'Zgodnie z recepturą mogą zawierać: gluten, ogórek, oshinko, kampyo, awokado, mango, melon, sałatę, sezam, serek philadelphia, majonez, sosy, złoto jadalne.'
+      },
+      service: {
+        en: 'We kindly inform you that we add a waiter service of 10% to the final bill.',
+        pl: 'Uprzejmie informujemy, że doliczamy serwis kelnerski w wysokości 10% do rachunku końcowego.'
+      }
+    };
+
+    // --- COMPONENTS ---
+
+    // 1. Dynamic Island
+    const DynamicIsland = ({ lang, setLang, onOpenInfo }) => {
+      const [expanded, setExpanded] = useState(false);
+      const [scrolled, setScrolled] = useState(false);
+
+      useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 100);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      return (
+        <div 
+          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center"
+          onMouseEnter={() => setExpanded(true)}
+          onMouseLeave={() => setExpanded(false)}
+        >
+          <div 
+            className={`bg-ink/90 backdrop-blur-xl text-white shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden flex flex-col ${
+              expanded ? 'w-[90vw] max-w-[500px] rounded-[32px] p-6' : 'w-[140px] h-[44px] rounded-full cursor-pointer hover:w-[160px] hover:scale-105'
+            }`}
+            onClick={() => !expanded && setExpanded(true)}
+          >
+            {/* Collapsed */}
+            {!expanded && (
+              <div className="w-full h-full flex items-center justify-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gold animate-pulse"></div>
+                <span className="font-cinzel font-bold text-xs tracking-widest text-gold">MENU</span>
+              </div>
+            )}
+
+            {/* Expanded */}
+            <div className={`flex flex-col gap-6 w-full transition-opacity duration-300 ${expanded ? 'opacity-100 delay-100' : 'opacity-0 hidden'}`}>
+              
+              <div className="flex justify-between items-center border-b border-white/10 pb-4">
+                 <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center font-cinzel font-bold text-sm">KS</div>
+                   <span className="font-cinzel text-lg tracking-widest">KSIĘSTWO</span>
+                 </div>
+                 <button onClick={(e) => { e.stopPropagation(); setExpanded(false); }} className="text-white/50 hover:text-white">&times;</button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto no-scrollbar">
+                {DATA.map(s => (
+                  <button 
+                    key={s.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' });
+                      setExpanded(false);
+                    }}
+                    className="text-left px-4 py-3 rounded-xl bg-white/5 hover:bg-gold/20 hover:text-gold transition-colors font-rajdhani text-sm uppercase tracking-wider"
+                  >
+                    {s.title[lang]}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex justify-between items-center pt-2">
+                 <div className="flex bg-white/10 rounded-full p-1">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setLang('pl'); }}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${lang === 'pl' ? 'bg-gold text-ink' : 'text-white/60'}`}
+                    >PL</button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setLang('en'); }}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${lang === 'en' ? 'bg-gold text-ink' : 'text-white/60'}`}
+                    >EN</button>
+                 </div>
+                 <button 
+                   onClick={(e) => { e.stopPropagation(); onOpenInfo(); setExpanded(false); }}
+                   className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-gold hover:bg-gold hover:text-ink transition-colors"
+                 >!</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 2. Menu Components
+    // Accordion style for Sets
+    const MenuItemRow = ({ item, lang, isOpen, onToggle }) => {
+      // Logic for individual image display removed.
+      return (
+        <div className="border-b border-gray-200 last:border-0">
+          <div 
+            onClick={onToggle}
+            className="flex items-center justify-between py-6 cursor-pointer group hover:pl-4 transition-all duration-300"
+          >
+            <div className="flex flex-col">
+               <span className={`font-cinzel text-xl md:text-2xl transition-colors duration-300 ${isOpen ? 'text-gold-dark font-bold' : 'text-ink group-hover:text-gold-dark'}`}>
+                 {item.name[lang]}
+               </span>
+            </div>
+            <div className="flex items-center gap-4">
+               <span className="font-rajdhani font-bold text-gold-dark text-lg md:text-xl">{item.price}</span>
+               <span className={`text-gray-300 transform transition-transform duration-500 ${isOpen ? 'rotate-180 text-gold' : 'rotate-0'}`}>▼</span>
+            </div>
+          </div>
+
+          <div 
+            className={`overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] ${isOpen ? 'max-h-[500px] opacity-100 pb-8' : 'max-h-0 opacity-0'}`}
+          >
+             <div className="flex flex-col items-start pt-2 px-4 border-l-2 border-gold/30 ml-2">
+                <h4 className="font-cinzel text-gold text-xs tracking-[0.2em] uppercase mb-3 inline-block">
+                  {UI_TEXT.description_label[lang]}
+                </h4>
+                <p className="font-rajdhani text-ink text-lg md:text-xl leading-relaxed whitespace-pre-line">
+                  {item.desc[lang]}
+                </p>
+             </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Simple style for everything else
+    const MenuItemSimple = ({ item, lang }) => (
+      <div className="py-6 border-b border-gray-100 last:border-0 group hover:bg-gray-50/50 transition-colors px-4 -mx-4 rounded-xl">
+        <div className="flex justify-between items-baseline gap-4 mb-2">
+           <h3 className="font-cinzel text-xl text-ink font-semibold group-hover:text-gold-dark transition-colors">
+             {item.name[lang]}
+           </h3>
+           <span className="font-rajdhani font-bold text-gold-dark text-lg whitespace-nowrap">
+             {item.price}
+           </span>
+        </div>
+        <p className="font-rajdhani text-gray-500 text-base leading-relaxed max-w-3xl">
+          {item.desc[lang]}
+        </p>
+      </div>
+    );
+
+    const MenuSection = ({ data, lang, index }) => {
+      const [openItemId, setOpenItemId] = useState(null);
+      const toggleItem = (idx) => setOpenItemId(openItemId === idx ? null : idx);
+      
+      const isSets = data.id === 'sets';
+
+      return (
+        <section id={data.id} className="mb-0 w-full bg-white relative">
+          <div className="w-full h-[60vh] md:h-[80vh] relative flex items-center justify-center overflow-hidden">
+            <div 
+               className="absolute inset-0 parallax-bg"
+               style={{ backgroundImage: `url(${data.img || 'https://picsum.photos/1920/1080'})` }}
+            ></div>
+            <div className="absolute inset-0 bg-black/40"></div>
+            
+            <div className="relative z-10 text-center text-white px-4 animate-fade-in">
+               <span className="block font-cinzel text-gold text-lg md:text-xl tracking-[0.4em] mb-4">0{index + 1}</span>
+               <h2 className="font-cinzel text-5xl md:text-8xl font-bold tracking-widest uppercase mb-6 drop-shadow-lg">
+                 {data.title[lang]}
+               </h2>
+               <p className="font-rajdhani text-lg md:text-2xl max-w-2xl mx-auto text-gray-200 font-light">
+                 {data.desc[lang]}
+               </p>
+               {data.note && (
+                 <div className="mt-8 inline-block bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/20 text-sm font-rajdhani tracking-wide">
+                   ℹ {data.note[lang]}
+                 </div>
+               )}
+            </div>
+          </div>
+
+          <div className="max-w-5xl mx-auto px-6 py-20 md:py-32 bg-white relative -mt-10 rounded-t-3xl shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.1)] z-20">
+             {data.isSplit ? (
+               <div className="space-y-20">
+                 <div>
+                   <h3 className="text-center font-cinzel text-2xl text-gold mb-12 tracking-widest">{UI_TEXT.uramaki_title[lang]}</h3>
+                   <div className="flex flex-col">
+                     {data.items.map((item, i) => (
+                       isSets ? (
+                         <MenuItemRow 
+                           key={`l-${i}`} 
+                           item={item} 
+                           lang={lang} 
+                           isOpen={openItemId === i} 
+                           onToggle={() => toggleItem(i)} 
+                         />
+                       ) : (
+                         <MenuItemSimple key={`l-${i}`} item={item} lang={lang} />
+                       )
+                     ))}
+                   </div>
+                 </div>
+                 <div>
+                   <h3 className="text-center font-cinzel text-2xl text-gold mb-12 tracking-widest">{UI_TEXT.tempura_title[lang]}</h3>
+                   <div className="flex flex-col">
+                     {data.itemsRight?.map((item, i) => {
+                       const idx = i + 1000;
+                       return isSets ? (
+                        <MenuItemRow 
+                          key={`r-${i}`} 
+                          item={item} 
+                          lang={lang} 
+                          isOpen={openItemId === idx} 
+                          onToggle={() => toggleItem(idx)} 
+                        />
+                       ) : (
+                        <MenuItemSimple key={`r-${i}`} item={item} lang={lang} />
+                       )
+                     })}
+                   </div>
+                 </div>
+               </div>
+             ) : (
+               <div className="flex flex-col">
+                  {data.items.map((item, i) => (
+                    isSets ? (
+                      <MenuItemRow 
+                        key={i} 
+                        item={item} 
+                        lang={lang} 
+                        isOpen={openItemId === i} 
+                        onToggle={() => toggleItem(i)} 
+                      />
+                    ) : (
+                      <MenuItemSimple key={i} item={item} lang={lang} />
+                    )
+                  ))}
+               </div>
+             )}
+          </div>
+        </section>
+      );
+    };
+
+    // 3. Intro & Selection
+    const Intro = ({ onComplete }) => {
+      const [opacity, setOpacity] = useState(1);
+      const [mounted, setMounted] = useState(true);
+      const hasRun = useRef(false);
+
+      useEffect(() => {
+        if (hasRun.current) return;
+        hasRun.current = true;
+
+        const timer = setTimeout(() => {
+          setOpacity(0);
+          setTimeout(() => {
+            setMounted(false);
+            onComplete();
+          }, 800); 
+        }, 1500);
+        return () => clearTimeout(timer);
+      }, [onComplete]);
+
+      if (!mounted) return null;
+
+      return (
+        <div 
+          className="fixed inset-0 z-[9999] bg-ink flex flex-col items-center justify-center transition-opacity duration-1000"
+          style={{ opacity }}
+        >
+          <div className="relative text-center p-8 flex flex-col items-center">
+            <h1 className="font-cinzel text-6xl md:text-9xl text-white font-bold tracking-[0.2em] mb-6 animate-slide-up">
+              KS
+            </h1>
+            <div className="h-[2px] bg-gold mb-6 animate-grow-line"></div>
+            <div className="text-gold uppercase tracking-[0.5em] font-rajdhani text-sm animate-fade-in" style={{animationDelay: '0.4s', opacity: 0, animationFillMode: 'forwards'}}>
+              CINEMATIC DINING
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const LanguageSelection = ({ onSelect }) => {
+      const [opacity, setOpacity] = useState(0);
+      
+      useEffect(() => {
+        // Fade in
+        setTimeout(() => setOpacity(1), 50);
+      }, []);
+
+      const handleSelect = (l) => {
+        setOpacity(0);
+        setTimeout(() => onSelect(l), 500);
+      };
+
+      return (
+        <div 
+          className="fixed inset-0 z-[9990] bg-ink flex flex-col items-center justify-center transition-opacity duration-700"
+          style={{ opacity }}
+        >
+          <div className="relative z-10 text-center p-8 w-full max-w-lg flex flex-col items-center">
+             <div className="w-16 h-16 border border-gold text-gold flex items-center justify-center font-cinzel text-xl mx-auto mb-16 animate-fade-in">KS</div>
+             
+             <div className="flex gap-8 justify-center w-full">
+               <button 
+                 onClick={() => handleSelect('pl')}
+                 className="w-40 h-14 border border-white/20 hover:border-gold hover:bg-gold/10 transition-all duration-500 flex items-center justify-center group"
+               >
+                 <span className="font-rajdhani text-white text-xl tracking-[0.2em] group-hover:text-gold transition-colors">PL</span>
+               </button>
+
+               <button 
+                 onClick={() => handleSelect('en')}
+                 className="w-40 h-14 border border-white/20 hover:border-gold hover:bg-gold/10 transition-all duration-500 flex items-center justify-center group"
+               >
+                 <span className="font-rajdhani text-white text-xl tracking-[0.2em] group-hover:text-gold transition-colors">EN</span>
+               </button>
+             </div>
+          </div>
+        </div>
+      );
+    };
+
+    const App = () => {
+      // States: 'intro' -> 'lang' -> 'app'
+      const [phase, setPhase] = useState('intro');
+      const [lang, setLang] = useState('pl');
+      const [showInfo, setShowInfo] = useState(false);
+
+      useEffect(() => {
+        if (phase === 'app') {
+            document.body.style.backgroundColor = '#F0EFEA'; // Alabaster
+            document.documentElement.classList.remove('overflow-hidden');
+        } else {
+            document.body.style.backgroundColor = '#0F0F0F'; // Dark
+            document.documentElement.classList.add('overflow-hidden');
+        }
+      }, [phase]);
+
+      const handleIntroComplete = () => {
+          setPhase('lang');
+      };
+
+      const handleLangSelect = (l) => {
+          setLang(l);
+          setPhase('app');
+      };
+
+      return (
+        <React.Fragment>
+          {phase === 'intro' && <Intro onComplete={handleIntroComplete} />}
+          
+          {phase === 'lang' && <LanguageSelection onSelect={handleLangSelect} />}
+
+          {/* Main App Content */}
+          <div className={`min-h-screen bg-alabaster transition-opacity duration-1000 ${phase === 'app' ? 'opacity-100 relative' : 'opacity-0 fixed inset-0 pointer-events-none'}`}>
+            
+            {phase === 'app' && (
+             <React.Fragment>
+                <DynamicIsland lang={lang} setLang={setLang} onOpenInfo={() => setShowInfo(true)} />
+
+                {/* HERO LANDING */}
+                <div className="h-screen w-full relative flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-ink">
+                      <img 
+                        src="images/zestawy.jpg" 
+                        className="w-full h-full object-cover opacity-40 mix-blend-overlay"
+                        alt="Hero"
+                      />
+                  </div>
+                  <div className="relative z-10 text-center px-6">
+                      <h1 className="font-cinzel text-4xl md:text-7xl text-white font-bold tracking-[0.15em] mb-6 drop-shadow-2xl">
+                        KSIĘSTWO
+                        <span className="block text-gold text-2xl md:text-4xl mt-4 tracking-[0.3em] font-normal border-t border-b border-gold/30 py-4 mx-auto max-w-2xl">
+                          SUSHI & RAMEN
+                        </span>
+                      </h1>
+                      <p className="font-rajdhani text-gray-300 tracking-widest uppercase text-sm md:text-base max-w-lg mx-auto leading-loose pt-6 whitespace-pre-line">
+                        {UI_TEXT.hero_subtitle[lang]}
+                      </p>
+                      <button 
+                        onClick={() => document.getElementById('sets')?.scrollIntoView({ behavior: 'smooth' })}
+                        className="mt-12 px-8 py-4 border border-gold text-gold font-cinzel hover:bg-gold hover:text-ink transition-all duration-500 uppercase tracking-widest text-sm"
+                      >
+                        {UI_TEXT.explore_btn[lang]}
+                      </button>
+                  </div>
+                  
+                  <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce text-gold/50">
+                      ↓
+                  </div>
+                </div>
+
+                <main className="relative z-10 w-full bg-white">
+                    {DATA.map((section, idx) => (
+                      <MenuSection 
+                        key={section.id} 
+                        data={section} 
+                        lang={lang} 
+                        index={idx}
+                      />
+                    ))}
+                </main>
+
+                <footer className="bg-ink text-white pt-32 pb-16 px-6">
+                  <div className="max-w-4xl mx-auto text-center">
+                      <div className="w-16 h-16 border border-gold text-gold flex items-center justify-center font-cinzel text-2xl mx-auto mb-10">KS</div>
+                      
+                      <div className="grid md:grid-cols-2 gap-12 mb-20 text-left md:text-center font-rajdhani text-gray-400">
+                          <div>
+                            <h5 className="text-white font-cinzel tracking-widest mb-4">{UI_TEXT.location_label[lang]}</h5>
+                            <a href="https://maps.app.goo.gl/T5n17WJtzwm2L7VTA" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors block leading-relaxed">
+                              <p>Krupówki 38A, Zakopane</p>
+                              <p>{UI_TEXT.poland[lang]}</p>
+                            </a>
+                          </div>
+                          <div>
+                            <h5 className="text-white font-cinzel tracking-widest mb-4">{UI_TEXT.contact_label[lang]}</h5>
+                            <a href="tel:+48502525544" className="hover:text-gold transition-colors block mb-1">+48 502 525 544</a>
+                            <a href="https://instagram.com/ksiestwosushi" target="_blank" rel="noopener noreferrer" className="hover:text-gold transition-colors block">@ksiestwosushi</a>
+                          </div>
+                      </div>
+
+                      <div className="text-[10px] text-gray-700 font-rajdhani tracking-[0.3em] uppercase border-t border-white/5 pt-10">
+                        © 2024 Księstwo Sushi & Ramen. {UI_TEXT.copyright[lang]}
+                      </div>
+                  </div>
+                </footer>
+
+                {showInfo && (
+                  <div 
+                    className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex justify-center items-center p-6 transition-all"
+                    onClick={() => setShowInfo(false)}
+                  >
+                    <div 
+                      className="bg-paper max-w-xl w-full p-12 relative shadow-2xl border border-gold/20"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button 
+                        className="absolute top-6 right-6 text-3xl text-gray-300 hover:text-gold transition-colors leading-none"
+                        onClick={() => setShowInfo(false)}
+                      >
+                        &times;
+                      </button>
+
+                      <h2 className="font-cinzel text-3xl text-ink mb-8 text-center tracking-widest">{ALLERGIES.title[lang]}</h2>
+                      <div className="font-rajdhani text-gray-600 leading-8 text-lg mb-8 text-justify font-light">
+                        {ALLERGIES.text[lang]}
+                      </div>
+                      <div className="p-4 bg-alabaster text-center text-xs text-gold-dark font-bold uppercase tracking-[0.2em] border border-gold/10">
+                          {ALLERGIES.service[lang]}
+                      </div>
+                    </div>
+                  </div>
+                )}
+             </React.Fragment>
+            )}
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
