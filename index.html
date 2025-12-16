@@ -60,7 +60,6 @@
       background-color: #0F0F0F;
       color: #0F0F0F;
       overflow-x: hidden;
-      /* Prevent text selection */
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
@@ -68,7 +67,6 @@
     }
     
     img {
-      /* Prevent image dragging */
       -webkit-user-drag: none;
       -khtml-user-drag: none;
       -moz-user-drag: none;
@@ -93,11 +91,33 @@
       background-size: cover;
     }
     
-    /* Disable parallax on mobile for performance */
     @media (pointer: coarse) {
         .parallax-bg {
             background-attachment: scroll;
         }
+    }
+
+    /* FLUID DROPPLET ANIMATION */
+    .droplet-transition {
+      transition-property: width, height, border-radius, opacity, transform;
+      transition-duration: 0.8s;
+      /* Custom spring-like bezier for fluid effect */
+      transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+    }
+    
+    /* Hover state specific transition (slightly faster) */
+    .droplet-hover-transition {
+      transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .icon-filter-gold {
+      filter: invert(76%) sepia(35%) saturate(859%) hue-rotate(5deg) brightness(92%) contrast(85%);
+    }
+    .icon-filter-white {
+      filter: brightness(0) invert(1);
+    }
+    .group:hover .group-hover\:icon-filter-gold {
+      filter: invert(76%) sepia(35%) saturate(859%) hue-rotate(5deg) brightness(92%) contrast(85%);
     }
   </style>
 <script type="importmap">
@@ -145,17 +165,17 @@
   <div id="app" class="min-h-screen bg-alabaster transition-opacity duration-1000 opacity-0 relative hidden">
     
     <!-- NAVIGATION (DYNAMIC ISLAND) -->
-    <div id="dynamic-island-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center transition-all duration-300">
-      <div id="island" class="bg-ink/90 backdrop-blur-xl text-white shadow-2xl transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] overflow-hidden flex flex-col w-[140px] h-[44px] rounded-full cursor-pointer hover:w-[160px] hover:scale-105">
+    <div id="dynamic-island-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center">
+      <div id="island" class="bg-ink/90 backdrop-blur-xl text-white shadow-2xl droplet-transition overflow-hidden flex flex-col w-[140px] h-[44px] rounded-full cursor-pointer hover:w-[160px] hover:scale-105">
         
         <!-- Collapsed -->
-        <div id="island-collapsed" class="w-full h-[44px] absolute top-0 left-0 flex items-center justify-center gap-2 transition-opacity duration-300">
+        <div id="island-collapsed" class="w-full h-[44px] absolute top-0 left-0 flex items-center justify-center gap-2 transition-opacity duration-500">
           <div class="w-2 h-2 rounded-full bg-gold animate-pulse"></div>
           <span class="font-cinzel font-bold text-xs tracking-widest text-gold">MENU</span>
         </div>
 
         <!-- Expanded -->
-        <div id="island-expanded" class="flex flex-col gap-6 w-full p-6 opacity-0 hidden transition-opacity duration-300">
+        <div id="island-expanded" class="flex flex-col gap-6 w-full p-6 opacity-0 hidden transition-opacity duration-500 delay-100">
           <div class="flex justify-between items-center border-b border-white/10 pb-4">
              <div class="flex items-center gap-3">
                <div class="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center font-cinzel font-bold text-sm">KS</div>
@@ -212,17 +232,32 @@
           <div class="w-16 h-16 border border-gold text-gold flex items-center justify-center font-cinzel text-2xl mx-auto mb-10">KS</div>
           
           <div class="grid md:grid-cols-2 gap-12 mb-20 text-left md:text-center font-rajdhani text-gray-400">
-              <div>
-                <h5 id="footer-loc" class="text-white font-cinzel tracking-widest mb-4">LOCATION</h5>
-                <a href="https://maps.app.goo.gl/T5n17WJtzwm2L7VTA" target="_blank" rel="noopener noreferrer" class="hover:text-gold transition-colors block leading-relaxed cursor-pointer">
-                  <p>Krupówki 38A, Zakopane</p>
-                  <p id="footer-country">Poland</p>
+              <div class="flex flex-col md:items-center items-start">
+                <h5 id="footer-loc" class="text-white font-cinzel tracking-widest mb-6">LOCATION</h5>
+                <a href="https://maps.app.goo.gl/T5n17WJtzwm2L7VTA" target="_blank" rel="noopener noreferrer" class="group flex items-start gap-4 hover:text-gold transition-colors leading-relaxed cursor-pointer">
+                   <div class="w-6 h-6 mt-1 flex-shrink-0">
+                      <img src="./images/google_maps.png" class="w-full h-full object-contain icon-filter-white group-hover:icon-filter-gold transition-all" alt="Map">
+                   </div>
+                   <div class="text-left">
+                     <p>Krupówki 38A, Zakopane</p>
+                     <p id="footer-country">Poland</p>
+                   </div>
                 </a>
               </div>
-              <div>
-                <h5 id="footer-contact" class="text-white font-cinzel tracking-widest mb-4">CONTACT</h5>
-                <a href="tel:+48502525544" class="hover:text-gold transition-colors block mb-1 cursor-pointer">+48 502 525 544</a>
-                <a href="https://instagram.com/ksiestwosushi" target="_blank" rel="noopener noreferrer" class="hover:text-gold transition-colors block cursor-pointer">@ksiestwosushi</a>
+              <div class="flex flex-col md:items-center items-start">
+                <h5 id="footer-contact" class="text-white font-cinzel tracking-widest mb-6">CONTACT</h5>
+                <a href="tel:+48502525544" class="group flex items-center gap-4 hover:text-gold transition-colors mb-4 cursor-pointer">
+                    <div class="w-6 h-6 flex-shrink-0">
+                        <img src="./images/phone.png" class="w-full h-full object-contain icon-filter-white group-hover:icon-filter-gold transition-all" alt="Phone">
+                    </div>
+                    <span>+48 502 525 544</span>
+                </a>
+                <a href="https://instagram.com/ksiestwosushi" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-4 hover:text-gold transition-colors cursor-pointer">
+                    <div class="w-6 h-6 flex-shrink-0">
+                        <img src="./images/instagram.png" class="w-full h-full object-contain icon-filter-white group-hover:icon-filter-gold transition-all" alt="Instagram">
+                    </div>
+                    <span>@ksiestwosushi</span>
+                </a>
               </div>
           </div>
 
@@ -287,7 +322,7 @@
       {
         id: 'sets',
         title: { en: 'Sushi Sets', pl: 'Zestawy Sushi' },
-        img: `${PHOTOS_PATH}MAGURO.jpg`, // Using MAGURO for Sets as it's usually premium
+        img: `${PHOTOS_PATH}zestawy.jpg`,
         desc: {
           en: 'Curated combinations of our finest rolls, perfect for experiencing a variety of flavors.',
           pl: 'Starannie dobrane kompozycje naszych najlepszych rolek, idealne do poznania różnorodności smaków.'
@@ -338,7 +373,7 @@
       {
         id: 'starters',
         title: { en: 'Starters', pl: 'Przystawki' },
-        img: `${PHOTOS_PATH}ebiten.jpg`,
+        img: `${PHOTOS_PATH}sake-tataki.jpg`,
         desc: {
           en: 'A selection of light and fresh starters to begin your sushi experience.',
           pl: 'Wybór lekkich i świeżych przystawek na rozpoczęcie przygody z sushi.'
@@ -534,12 +569,14 @@
 
       island.addEventListener('mouseenter', () => {
          if(!isMenuExpanded) {
+             island.classList.remove('w-[140px]');
              island.classList.add('w-[160px]', 'scale-105');
          }
       });
       island.addEventListener('mouseleave', () => {
          if(!isMenuExpanded) {
              island.classList.remove('w-[160px]', 'scale-105');
+             island.classList.add('w-[140px]');
          }
       });
 
