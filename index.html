@@ -97,17 +97,15 @@
         }
     }
 
-    /* FLUID DROPPLET ANIMATION */
-    .droplet-transition {
-      transition-property: width, height, border-radius, opacity, transform;
-      transition-duration: 0.8s;
-      /* Custom spring-like bezier for fluid effect */
-      transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
-    }
-    
-    /* Hover state specific transition (slightly faster) */
-    .droplet-hover-transition {
-      transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* MENU ANIMATION */
+    .menu-panel {
+      /* Smooth quint/expo easing for premium feel */
+      transition: width 0.6s cubic-bezier(0.19, 1, 0.22, 1), 
+                  height 0.6s cubic-bezier(0.19, 1, 0.22, 1),
+                  border-radius 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+      transform-origin: top center;
+      will-change: width, height, border-radius;
+      box-shadow: none !important;
     }
 
     .icon-filter-gold {
@@ -123,8 +121,8 @@
 <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
   }
 }
 </script>
@@ -164,38 +162,47 @@
   <!-- MAIN APPLICATION -->
   <div id="app" class="min-h-screen bg-alabaster transition-opacity duration-1000 opacity-0 relative hidden">
     
-    <!-- NAVIGATION (DYNAMIC ISLAND) -->
-    <div id="dynamic-island-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center">
-      <div id="island" class="bg-ink/90 backdrop-blur-xl text-white shadow-2xl droplet-transition overflow-hidden flex flex-col w-[140px] h-[44px] rounded-full cursor-pointer hover:w-[160px] hover:scale-105">
+    <!-- NAVIGATION (INITIAL SHAPE: PILL TO WIDE CARD) -->
+    <div id="menu-container" class="fixed top-6 left-0 w-full z-50 flex justify-center pointer-events-none">
+      <div id="menu-panel" class="menu-panel bg-ink/95 backdrop-blur-md pointer-events-auto overflow-hidden flex flex-col items-center relative z-50 border border-white/5">
         
-        <!-- Collapsed -->
-        <div id="island-collapsed" class="w-full h-[44px] absolute top-0 left-0 flex items-center justify-center gap-2 transition-opacity duration-500">
-          <div class="w-2 h-2 rounded-full bg-gold animate-pulse"></div>
-          <span class="font-cinzel font-bold text-xs tracking-widest text-gold">MENU</span>
+        <!-- Collapsed Trigger -->
+        <div id="menu-trigger" class="absolute top-0 left-0 w-full h-[50px] flex items-center justify-center cursor-pointer z-50 group transition-colors duration-300">
+          <div class="flex items-center gap-3 group-hover:scale-105 transition-transform duration-500 ease-out">
+            <div class="w-2 h-2 rounded-full bg-gold animate-pulse"></div>
+            <span class="font-cinzel font-bold text-xs tracking-[0.2em] text-white group-hover:text-gold transition-colors">MENU</span>
+          </div>
         </div>
 
-        <!-- Expanded -->
-        <div id="island-expanded" class="flex flex-col gap-6 w-full p-6 opacity-0 hidden transition-opacity duration-500 delay-100">
-          <div class="flex justify-between items-center border-b border-white/10 pb-4">
-             <div class="flex items-center gap-3">
-               <div class="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center font-cinzel font-bold text-sm">KS</div>
-               <span class="font-cinzel text-lg tracking-widest">KSIĘSTWO</span>
+        <!-- Expanded Content -->
+        <div id="menu-content" class="w-full h-full pt-[60px] pb-6 px-6 opacity-0 transition-opacity duration-500 flex flex-col pointer-events-none">
+          
+          <!-- Close Button -->
+          <button id="close-menu" class="absolute top-4 right-6 text-white/50 hover:text-white text-xl z-50 transition-colors">&times;</button>
+          
+          <!-- Header inside menu -->
+          <div class="flex items-center gap-4 border-b border-white/10 pb-4 mb-4">
+             <div class="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center font-cinzel font-bold text-xs">KS</div>
+             <span class="font-cinzel text-white text-lg tracking-widest">KSIĘSTWO</span>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto no-scrollbar">
+             <!-- List (Grid 2 cols) -->
+             <div id="menu-list" class="grid grid-cols-2 gap-3">
+                <!-- Injected via JS -->
              </div>
-             <button id="close-island" class="text-white/50 hover:text-white text-xl">&times;</button>
           </div>
 
-          <div id="island-menu-list" class="grid grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto no-scrollbar">
-            <!-- Items injected by JS -->
-          </div>
-
-          <div class="flex justify-between items-center pt-2">
-             <div class="flex bg-white/10 rounded-full p-1">
-                <button onclick="switchLang('pl')" class="lang-btn-pl px-4 py-1.5 rounded-full text-xs font-bold transition-all text-white/60">PL</button>
-                <button onclick="switchLang('en')" class="lang-btn-en px-4 py-1.5 rounded-full text-xs font-bold transition-all text-white/60">EN</button>
+          <!-- Footer inside menu -->
+          <div class="mt-4 pt-4 flex justify-between items-center">
+             <div class="flex bg-white/10 rounded-full p-1 gap-1">
+                <button onclick="switchLang('pl')" class="lang-btn-pl px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider text-white/60">PL</button>
+                <button onclick="switchLang('en')" class="lang-btn-en px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider text-white/60">EN</button>
              </div>
              <button onclick="openInfoModal()" class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-gold hover:bg-gold hover:text-ink transition-colors">!</button>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -262,7 +269,7 @@
           </div>
 
           <div class="text-[10px] text-gray-700 font-rajdhani tracking-[0.3em] uppercase border-t border-white/5 pt-10">
-            © 2024 Księstwo Sushi & Ramen. <span id="footer-copy">Cinematic Edition.</span>
+            © 2025 Księstwo Sushi & Ramen.
           </div>
       </div>
     </footer>
@@ -299,8 +306,7 @@
       tempura_title: { en: "TEMPURA", pl: "W TEMPURZE" },
       location_label: { en: "LOCATION", pl: "LOKALIZACJA" },
       contact_label: { en: "CONTACT", pl: "KONTAKT" },
-      poland: { en: "Poland", pl: "Polska" },
-      copyright: { en: "Cinematic Edition.", pl: "Edycja Kinowa." }
+      poland: { en: "Poland", pl: "Polska" }
     };
 
     const ALLERGIES = {
@@ -316,7 +322,7 @@
     };
 
     /* =========================================
-       MENU DATA (LINKED TO LOCAL IMAGES)
+       MENU DATA (MAPPED TO YOUR FILES)
        ========================================= */
     const DATA = [
       {
@@ -330,7 +336,7 @@
         items: [
           {
             name: { en: 'OTO (16 pcs)', pl: 'OTO (16 szt.)' },
-            price: '90 zł',
+            price: '130 zł',
             desc: {
               en: '4x Gold California (surimi wrapped in raw salmon)\n4x Avocado Kani (surimi wrapped in avocado)\n4x Ohio Irygoma (butterfish rolled in black sesame)\n4x Ebi Ten (shrimp tempura)',
               pl: '4x Gold California (surimi owijane surowym łososiem)\n4x Awokado Kani (surimi owijane awokado)\n4x Ohio Irygoma (ryba maślana obtoczona w czarnym sezamie)\n4x Ebi Ten (krewetka w tempurze)'
@@ -338,7 +344,7 @@
           },
           {
             name: { en: 'AKA (22 pcs)', pl: 'AKA (22 szt.)' },
-            price: '130 zł',
+            price: '150 zł',
             desc: {
               en: '4x Rainbow (surimi wrapped in variety of raw fish)\n4x Mango Sake (raw salmon wrapped in mango)\n4x Ebi Ten (shrimp tempura)\n4x Avocado Kani (surimi wrapped in avocado)\n6x Futomaki Ohio Yaki (baked butterfish)',
               pl: '4x Rainbow (surimi owijane wachlarzem surowych ryb)\n4x Mango Sake (surowy łosoś owijany mango)\n4x Ebi Ten (krewetka w tempurze)\n4x Awokado Kani (surimi owijane awokado)\n6x Futomaki Ohio Yaki (pieczona ryba maślana)'
@@ -346,7 +352,7 @@
           },
           {
             name: { en: 'AKASHI (38 pcs)', pl: 'AKASHI (38 szt.)' },
-            price: '210 zł',
+            price: '280 zł',
             desc: {
               en: '8x Rainbow (surimi wrapped in variety of raw fish)\n8x Goma Sake Yaki (baked salmon topped with wakame)\n4x Ebi Ten (shrimp tempura)\n6x Sake Philadelphia (salmon with cream cheese)\n6x Ohio Ten (butterfish tempura)\n6x Maguro Spice (spicy tuna)',
               pl: '8x Rainbow (surimi owijane wachlarzem surowych ryb)\n8x Goma Sake Yaki (pieczony łosoś obłożony wakame)\n4x Ebi Ten (krewetka w tempurze)\n6x Sake Philadelphia (łosoś z serkiem philadelphia)\n6x Ohio Ten (maślana w tempurze)\n6x Maguro Spice (pikantny tuńczyk)'
@@ -354,7 +360,7 @@
           },
           {
             name: { en: 'KUROISO (52 pcs)', pl: 'KUROISO (52 szt.)' },
-            price: '290 zł',
+            price: '380 zł',
             desc: {
               en: '8x Rainbow (surimi wrapped in variety of raw fish)\n8x Tempura Ohio (butterfish tempura)\n8x Goma Yaki Sake (salmon topped with wakame)\n8x Kegon (salmon wrapped in eel)\n8x Ebi Ten Ohio Tataki (shrimp tempura topped with butterfish tartare)\n6x Sake Philadelphia (salmon with cream cheese)\n6x Suzuki Yaki (spicy zander)',
               pl: '8x Rainbow (surimi owijane wachlarzem surowych ryb)\n8x Tempura Ohio (maślana w tempurze)\n8x Goma Yaki Sake (łosoś obłożony wakame)\n8x Kegon (łosoś owijany węgorzem)\n8x Ebi Ten Ohio Tataki (krewetka w tempurze obłożona tatarem z maślanej)\n6x Sake Philadelphia (łosoś z serkiem philadelphia)\n6x Suzuki Yaki (pikantny sandacz)'
@@ -362,7 +368,7 @@
           },
           {
             name: { en: 'BIWA (60 pcs)', pl: 'BIWA (60 szt.)' },
-            price: '340 zł',
+            price: '520 zł',
             desc: {
               en: '8x Gold California (surimi wrapped in salmon)\n8x Ohio Ten Nashi (tempura butterfish wrapped in Japanese pear)\n8x Ebi Ten Avocado (tempura shrimp wrapped in avocado)\n8x Kegon (salmon wrapped in grilled eel)\n8x Tempura Cali Rae (spicy sea bream in tempura)\n6x Maguro Philadelphia (tuna with cream cheese)\n6x Ohio Spice Mango (spicy butterfish with mango)\n8x Nigiri (2x salmon, 2x tuna, 2x butterfish, 2x shrimp)',
               pl: '8x Gold California (surimi owijane łososiem)\n8x Ohio Ten Nashi (maślana w tempurze owijana japońską gruszką)\n8x Ebi Ten Avocado (krewetka w tempurze owijana awokado)\n8x Kegon (łosoś owijany węgorzem)\n8x Tempura Cali Rae (pikantna dorada cała w tempurze)\n6x Maguro Philadelphia (tuńczyk z serkiem philadelphia)\n6x Ohio Spice Mango (pikantna maślana z mango)\n8x Nigiri (2x łosoś, 2x tuńczyk, 2x maślana, 2x krewetka)'
@@ -381,22 +387,22 @@
         items: [
           {
             name: { en: 'Goma Wakame', pl: 'Goma Wakame' },
-            price: '20 zł',
+            price: '27 zł',
             desc: { en: 'seaweed salad', pl: 'sałatka z wodorostów' }
           },
           {
             name: { en: 'Ebi Ten (3 pcs)', pl: 'Ebi Ten (3 szt.)' },
-            price: '30 zł',
+            price: '36 zł',
             desc: { en: 'shrimp tempura served with ponzu sauce', pl: 'krewetki w tempurze z sosem ponzu' }
           },
           {
             name: { en: 'Sake Tataki', pl: 'Sake Tataki' },
-            price: '50 zł',
+            price: '60 zł',
             desc: { en: 'salmon tartare', pl: 'tatar z łososia' }
           },
           {
             name: { en: 'Maguro Tataki', pl: 'Maguro Tataki' },
-            price: '55 zł',
+            price: '70 zł',
             desc: { en: 'tuna tartare', pl: 'tatar z tuńczyka' }
           }
         ]
@@ -412,17 +418,17 @@
         items: [
           {
             name: { en: 'Ramen Chicken', pl: 'Ramen Chicken' },
-            price: '48 zł',
+            price: '60 zł',
             desc: { en: 'flavorful broth with chicken, vegetables, and ramen noodles', pl: 'bulion z warzywami, mięsem i makaronem ramen' }
           },
           {
             name: { en: 'Ramen Beef', pl: 'Ramen Beef' },
-            price: '55 zł',
+            price: '65 zł',
             desc: { en: 'beef ramen', pl: 'ramen wołowy' }
           },
           {
             name: { en: 'Seafood Udon', pl: 'Seafood Udon' },
-            price: '58 zł',
+            price: '60 zł',
             desc: { en: 'Spicy seafood soup with vegetables and udon noodles', pl: 'Ostra zupa z owocami morza, warzywami i makaronem udon' }
           }
         ]
@@ -436,14 +442,14 @@
           pl: 'Ręcznie formowany ryż z slajsem świeżej ryby lub owoców morza.'
         },
         items: [
-          { name: { en: 'Sake', pl: 'Sake' }, price: '26 zł', desc: { en: 'salmon', pl: 'łosoś' } },
-          { name: { en: 'Ohio', pl: 'Ohio' }, price: '25 zł', desc: { en: 'butterfish', pl: 'ryba maślana' } },
-          { name: { en: 'Maguro', pl: 'Maguro' }, price: '30 zł', desc: { en: 'tuna', pl: 'tuńczyk' } },
-          { name: { en: 'Unagi', pl: 'Unagi' }, price: '30 zł', desc: { en: 'eel', pl: 'węgorz' } },
-          { name: { en: 'Hotate', pl: 'Hotate' }, price: '32 zł', desc: { en: 'scallops', pl: 'małże św. Jakuba' } },
-          { name: { en: 'Tako', pl: 'Tako' }, price: '30 zł', desc: { en: 'octopus', pl: 'ośmiornica' } },
-          { name: { en: 'Ika', pl: 'Ika' }, price: '30 zł', desc: { en: 'squid', pl: 'kalmar' } },
-          { name: { en: 'Ebi', pl: 'Ebi' }, price: '30 zł', desc: { en: 'shrimp', pl: 'krewetka' } }
+          { name: { en: 'Sake', pl: 'Sake' }, price: '30 zł', desc: { en: 'salmon', pl: 'łosoś' } },
+          { name: { en: 'Ohio', pl: 'Ohio' }, price: '28 zł', desc: { en: 'butterfish', pl: 'ryba maślana' } },
+          { name: { en: 'Maguro', pl: 'Maguro' }, price: '35 zł', desc: { en: 'tuna', pl: 'tuńczyk' } },
+          { name: { en: 'Unagi', pl: 'Unagi' }, price: '35 zł', desc: { en: 'eel', pl: 'węgorz' } },
+          { name: { en: 'Hotate', pl: 'Hotate' }, price: '36 zł', desc: { en: 'scallops', pl: 'małże św. Jakuba' } },
+          { name: { en: 'Tako', pl: 'Tako' }, price: '35 zł', desc: { en: 'octopus', pl: 'ośmiornica' } },
+          { name: { en: 'Ika', pl: 'Ika' }, price: '35 zł', desc: { en: 'squid', pl: 'kalmar' } },
+          { name: { en: 'Ebi', pl: 'Ebi' }, price: '35 zł', desc: { en: 'shrimp', pl: 'krewetka' } }
         ]
       },
       {
@@ -455,14 +461,14 @@
           pl: 'Grube, tradycyjne rolki z nori na zewnątrz.'
         },
         items: [
-          { name: { en: 'Sake Philadelphia', pl: 'Sake Philadelphia' }, price: '38 zł', desc: { en: 'salmon with philadelphia cream cheese', pl: 'łosoś z serkiem philadelphia' } },
-          { name: { en: 'Maguro Negi Togarashi', pl: 'Maguro Negi Togarashi' }, price: '42 zł', desc: { en: 'tuna with spicy leek', pl: 'tuńczyk z porem na ostro' } },
-          { name: { en: 'Ohio Spice Mango', pl: 'Ohio Spice Mango' }, price: '40 zł', desc: { en: 'spicy butterfish with mango', pl: 'pikantna ryba maślana z mango' } },
+          { name: { en: 'Sake Philadelphia', pl: 'Sake Philadelphia' }, price: '50 zł', desc: { en: 'salmon with philadelphia cream cheese', pl: 'łosoś z serkiem philadelphia' } },
+          { name: { en: 'Maguro Negi Togarashi', pl: 'Maguro Negi Togarashi' }, price: '53 zł', desc: { en: 'tuna with spicy leek', pl: 'tuńczyk z porem na ostro' } },
+          { name: { en: 'Ohio Spice Mango', pl: 'Ohio Spice Mango' }, price: '50 zł', desc: { en: 'spicy butterfish with mango', pl: 'pikantna ryba maślana z mango' } },
           { name: { en: 'Ebi Spicy', pl: 'Ebi Spicy' }, price: '40 zł', desc: { en: 'spicy shrimp', pl: 'pikantna krewetka' } },
-          { name: { en: 'Ebi Tempura', pl: 'Ebi Tempura' }, price: '40 zł', desc: { en: 'shrimp tempura', pl: 'krewetka w tempurze' } },
-          { name: { en: 'Unagi Kabayaki', pl: 'Unagi Kabayaki' }, price: '45 zł', desc: { en: 'grilled eel with kabayaki sauce', pl: 'grillowany węgorz w sosie kabayaki' } },
-          { name: { en: 'Ika Tempura', pl: 'Ika Tempura' }, price: '48 zł', desc: { en: 'squid tempura', pl: 'kalmar w tempurze' } },
-          { name: { en: 'Veggie', pl: 'Veggie' }, price: '36 zł', desc: { en: 'vegetables', pl: 'warzywa' } }
+          { name: { en: 'Ebi Tempura', pl: 'Ebi Tempura' }, price: '50 zł', desc: { en: 'shrimp tempura', pl: 'krewetka w tempurze' } },
+          { name: { en: 'Unagi Kabayaki', pl: 'Unagi Kabayaki' }, price: '55 zł', desc: { en: 'grilled eel with kabayaki sauce', pl: 'grillowany węgorz w sosie kabayaki' } },
+          { name: { en: 'Ika Tempura', pl: 'Ika Tempura' }, price: '55 zł', desc: { en: 'squid tempura', pl: 'kalmar w tempurze' } },
+          { name: { en: 'Veggie', pl: 'Veggie' }, price: '50 zł', desc: { en: 'vegetables', pl: 'warzywa' } }
         ]
       },
       {
@@ -475,27 +481,27 @@
         },
         isSplit: true,
         items: [
-          { name: { en: 'Sake Philadelphia', pl: 'Sake Philadelphia' }, price: '38 zł', desc: { en: 'salmon with philadelphia cream cheese', pl: 'łosoś z serkiem philadelphia' } },
-          { name: { en: 'Awokado Sake', pl: 'Awokado Sake' }, price: '42 zł', desc: { en: 'salmon wrapped in avocado', pl: 'łosoś owijany awokado' } },
-          { name: { en: 'Mango Sake', pl: 'Mango Sake' }, price: '42 zł', desc: { en: 'salmon wrapped in mango', pl: 'łosoś owijany mango' } },
-          { name: { en: 'Maguro Orange Pepper', pl: 'Maguro Orange Pepper' }, price: '45 zł', desc: { en: 'tuna with chopped leek and orange pepper', pl: 'tuńczyk z siekanym porem i orange pepper' } },
-          { name: { en: 'Ebi Ten Mamemori', pl: 'Ebi Ten Mamemori' }, price: '42 zł', desc: { en: 'shrimp tempura wrapped in soy paper', pl: 'krewetka w tempurze zawijana w papier sojowy' } },
-          { name: { en: 'Gold California', pl: 'Gold California' }, price: '40 zł', desc: { en: 'surimi wrapped in salmon', pl: 'surimi owijane łososiem' } },
-          { name: { en: 'Rainbow', pl: 'Rainbow' }, price: '48 zł', desc: { en: 'surimi wrapped in assorted fish', pl: 'surimi owijane wachlarzem ryb' } },
-          { name: { en: 'Ohio Spice Sake', pl: 'Ohio Spice Sake' }, price: '42 zł', desc: { en: 'salmon wrapped in butterfish', pl: 'łosoś owijany opalaną maślaną' } },
-          { name: { en: 'Maguro Spicy Ebi Ten', pl: 'Maguro Spicy Ebi Ten' }, price: '45 zł', desc: { en: 'shrimp tempura wrapped in seared tuna', pl: 'krewetka w tempurze owijana opalanym tuńczykiem' } },
-          { name: { en: 'Kegon', pl: 'Kegon' }, price: '45 zł', desc: { en: 'salmon wrapped in grilled eel', pl: 'łosoś owijany grillowanym węgorzem' } },
-          { name: { en: 'Sake Aburi', pl: 'Sake Aburi' }, price: '45 zł', desc: { en: 'salmon wrapped in seared spicy salmon', pl: 'łosoś owijany opalanym pikantnym łososiem' } },
-          { name: { en: 'Tobiko Ohio Ten', pl: 'Tobiko Ohio Ten' }, price: '48 zł', desc: { en: 'butterfish in tempura coated with caviar', pl: 'maślana w tempurze obtoczona kawiorem z latającej ryby' } },
-          { name: { en: 'Nashi Sake', pl: 'Nashi Sake' }, price: '45 zł', desc: { en: 'salmon wrapped in Japanese pear', pl: 'łosoś owijany japońską gruszką' } },
-          { name: { en: 'Sake Tataki Ebiten', pl: 'Sake Tataki Ebiten' }, price: '48 zł', desc: { en: 'shrimp tempura wrapped in salmon tartare', pl: 'krewetka w tempurze obłożona tatarem z łososia' } }
+          { name: { en: 'Sake Philadelphia', pl: 'Sake Philadelphia' }, price: '55 zł', desc: { en: 'salmon with philadelphia cream cheese', pl: 'łosoś z serkiem philadelphia' } },
+          { name: { en: 'Awokado Sake', pl: 'Awokado Sake' }, price: '58 zł', desc: { en: 'salmon wrapped in avocado', pl: 'łosoś owijany awokado' } },
+          { name: { en: 'Mango Sake', pl: 'Mango Sake' }, price: '58 zł', desc: { en: 'salmon wrapped in mango', pl: 'łosoś owijany mango' } },
+          { name: { en: 'Maguro Orange Pepper', pl: 'Maguro Orange Pepper' }, price: '60 zł', desc: { en: 'tuna with chopped leek and orange pepper', pl: 'tuńczyk z siekanym porem i orange pepper' } },
+          { name: { en: 'Ebi Ten Mamemori', pl: 'Ebi Ten Mamemori' }, price: '55 zł', desc: { en: 'shrimp tempura wrapped in soy paper', pl: 'krewetka w tempurze zawijana w papier sojowy' } },
+          { name: { en: 'Gold California', pl: 'Gold California' }, price: '55 zł', desc: { en: 'surimi wrapped in salmon', pl: 'surimi owijane łososiem' } },
+          { name: { en: 'Rainbow', pl: 'Rainbow' }, price: '60 zł', desc: { en: 'surimi wrapped in assorted fish', pl: 'surimi owijane wachlarzem ryb' } },
+          { name: { en: 'Ohio Spice Sake', pl: 'Ohio Spice Sake' }, price: '55 zł', desc: { en: 'salmon wrapped in butterfish', pl: 'łosoś owijany opalaną maślaną' } },
+          { name: { en: 'Maguro Spicy Ebi Ten', pl: 'Maguro Spicy Ebi Ten' }, price: '60 zł', desc: { en: 'shrimp tempura wrapped in seared tuna', pl: 'krewetka w tempurze owijana opalanym tuńczykiem' } },
+          { name: { en: 'Kegon', pl: 'Kegon' }, price: '60 zł', desc: { en: 'salmon wrapped in grilled eel', pl: 'łosoś owijany grillowanym węgorzem' } },
+          { name: { en: 'Sake Aburi', pl: 'Sake Aburi' }, price: '60 zł', desc: { en: 'salmon wrapped in seared spicy salmon', pl: 'łosoś owijany opalanym pikantnym łososiem' } },
+          { name: { en: 'Tobiko Ohio Ten', pl: 'Tobiko Ohio Ten' }, price: '62 zł', desc: { en: 'butterfish in tempura coated with caviar', pl: 'maślana w tempurze obtoczona kawiorem z latającej ryby' } },
+          { name: { en: 'Nashi Sake', pl: 'Nashi Sake' }, price: '60 zł', desc: { en: 'salmon wrapped in Japanese pear', pl: 'łosoś owijany japońską gruszką' } },
+          { name: { en: 'Sake Tataki Ebiten', pl: 'Sake Tataki Ebiten' }, price: '60 zł', desc: { en: 'shrimp tempura wrapped in salmon tartare', pl: 'krewetka w tempurze obłożona tatarem z łososia' } }
         ],
         itemsRight: [
-          { name: { en: 'Tempura Sake', pl: 'Tempura Sake' }, price: '38 zł', desc: { en: 'salmon', pl: 'łosoś' } },
-          { name: { en: 'Tempura Ohio', pl: 'Tempura Ohio' }, price: '38 zł', desc: { en: 'butterfish', pl: 'maślana' } },
-          { name: { en: 'Tempura Maguro', pl: 'Tempura Maguro' }, price: '42 zł', desc: { en: 'tuna', pl: 'tuńczyk' } },
-          { name: { en: 'Tempura Ebi', pl: 'Tempura Ebi' }, price: '40 zł', desc: { en: 'steamed shrimp', pl: 'parzona krewetka' } },
-          { name: { en: 'Tempura Unagi Kabayaki', pl: 'Tempura Unagi Kabayaki' }, price: '45 zł', desc: { en: 'grilled eel', pl: 'grillowany węgorz' } }
+          { name: { en: 'Tempura Sake', pl: 'Tempura Sake' }, price: '55 zł', desc: { en: 'salmon', pl: 'łosoś' } },
+          { name: { en: 'Tempura Ohio', pl: 'Tempura Ohio' }, price: '55 zł', desc: { en: 'butterfish', pl: 'maślana' } },
+          { name: { en: 'Tempura Maguro', pl: 'Tempura Maguro' }, price: '55 zł', desc: { en: 'tuna', pl: 'tuńczyk' } },
+          { name: { en: 'Tempura Ebi', pl: 'Tempura Ebi' }, price: '55 zł', desc: { en: 'steamed shrimp', pl: 'parzona krewetka' } },
+          { name: { en: 'Tempura Unagi Kabayaki', pl: 'Tempura Unagi Kabayaki' }, price: '55 zł', desc: { en: 'grilled eel', pl: 'grillowany węgorz' } }
         ]
       },
       {
@@ -507,9 +513,9 @@
           pl: 'Nasze specjalne rolki, często zawijane w rybę lub awokado zamiast nori.'
         },
         items: [
-          { name: { en: 'Sake Ebi Tataki', pl: 'Sake Ebi Tataki' }, price: '36 zł', desc: { en: 'chopped shrimp wrapped in salmon', pl: 'siekana krewetka owijana w łososia' } },
-          { name: { en: 'Sake Ikura', pl: 'Sake Ikura' }, price: '42 zł', desc: { en: 'caviar with salmon wrapped in tuna', pl: 'kawior z łososia owijany tuńczykiem' } },
-          { name: { en: 'Maguro Sake Tataki', pl: 'Maguro Sake Tataki' }, price: '45 zł', desc: { en: 'chopped salmon wrapped in tuna', pl: 'siekany łosoś owijany tuńczykiem' } }
+          { name: { en: 'Sake Ebi Tataki', pl: 'Sake Ebi Tataki' }, price: '44 zł', desc: { en: 'chopped shrimp wrapped in salmon', pl: 'siekana krewetka owijana w łososia' } },
+          { name: { en: 'Sake Ikura', pl: 'Sake Ikura' }, price: '50 zł', desc: { en: 'caviar with salmon wrapped in tuna', pl: 'kawior z łososia owijany tuńczykiem' } },
+          { name: { en: 'Maguro Sake Tataki', pl: 'Maguro Sake Tataki' }, price: '48 zł', desc: { en: 'chopped salmon wrapped in tuna', pl: 'siekany łosoś owijany tuńczykiem' } }
         ]
       },
       {
@@ -521,7 +527,7 @@
           pl: 'Cienko krojone slajsy surowej ryby i owoców morza, podawane bez ryżu.'
         },
         items: [
-          { name: { en: 'Mizu', pl: 'Mizu' }, price: '95 zł', desc: { en: 'slices of raw fish — salmon, tuna, butterfish', pl: 'slajsy surowej ryby — łosoś, tuńczyk, maślana' } }
+          { name: { en: 'Mizu', pl: 'Mizu' }, price: '125 zł', desc: { en: 'slices of raw fish — salmon, tuna, butterfish', pl: 'slajsy surowej ryby — łosoś, tuńczyk, maślana' } }
         ]
       }
     ];
@@ -555,35 +561,67 @@
         }, 1000);
       }, 1500);
 
-      // Initialize Hero Image (Using the image from the first section)
-      document.getElementById('hero-img').src = DATA[0].img;
+      // Initialize Hero Image (Using ZESTAWY as Hero to look grand)
+      document.getElementById('hero-img').src = `${PHOTOS_PATH}zestawy.jpg`;
       
-      // Setup Dynamic Island Listeners
-      const island = document.getElementById('island');
-      const container = document.getElementById('dynamic-island-container');
-      const closeBtn = document.getElementById('close-island');
+      // Setup Menu Listeners
+      const panel = document.getElementById('menu-panel');
+      const trigger = document.getElementById('menu-trigger');
+      const closeBtn = document.getElementById('close-menu');
 
-      island.addEventListener('click', (e) => {
-        if(!isMenuExpanded) toggleMenu(true);
-      });
+      // Initial state
+      setMenuState(false);
 
-      island.addEventListener('mouseenter', () => {
-         if(!isMenuExpanded) {
-             island.classList.remove('w-[140px]');
-             island.classList.add('w-[160px]', 'scale-105');
-         }
-      });
-      island.addEventListener('mouseleave', () => {
-         if(!isMenuExpanded) {
-             island.classList.remove('w-[160px]', 'scale-105');
-             island.classList.add('w-[140px]');
-         }
+      trigger.addEventListener('click', (e) => {
+        if(!isMenuExpanded) {
+            toggleMenu(true);
+        }
       });
 
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleMenu(false);
       });
+    }
+
+    function setMenuState(expanded) {
+        const panel = document.getElementById('menu-panel');
+        const trigger = document.getElementById('menu-trigger');
+        const content = document.getElementById('menu-content');
+
+        if(expanded) {
+            // Expanded: Large Wide Card (matching screenshot)
+            // Using 90vw width with max of 500px, 2 columns layout
+            panel.style.width = '90vw'; 
+            panel.style.maxWidth = '500px';
+            panel.style.height = '500px'; // Approx height to fit all items
+            panel.style.borderRadius = '32px'; 
+            
+            trigger.style.opacity = '0';
+            trigger.style.pointerEvents = 'none';
+            
+            content.style.opacity = '1';
+            content.style.pointerEvents = 'auto';
+            content.style.transitionDelay = '0.3s';
+        } else {
+            // Collapsed: Pill shape (Initial design)
+            panel.style.width = '140px';
+            panel.style.height = '50px';
+            panel.style.maxWidth = 'none';
+            panel.style.borderRadius = '9999px'; // Fully rounded
+            
+            trigger.style.opacity = '1';
+            trigger.style.pointerEvents = 'auto';
+            
+            content.style.opacity = '0';
+            content.style.pointerEvents = 'none';
+            content.style.transitionDelay = '0s';
+        }
+    }
+
+    function toggleMenu(expand) {
+        isMenuExpanded = expand;
+        setMenuState(expand);
     }
 
     function setLanguage(lang) {
@@ -609,36 +647,6 @@
     function switchLang(lang) {
         currentLang = lang;
         renderApp();
-    }
-
-    function toggleMenu(expand) {
-        isMenuExpanded = expand;
-        const island = document.getElementById('island');
-        const collapsed = document.getElementById('island-collapsed');
-        const expanded = document.getElementById('island-expanded');
-
-        if(expand) {
-            island.classList.remove('w-[140px]', 'h-[44px]', 'rounded-full', 'hover:w-[160px]', 'hover:scale-105', 'cursor-pointer');
-            island.classList.add('w-[90vw]', 'max-w-[500px]', 'rounded-[32px]', 'cursor-default');
-            
-            collapsed.classList.add('opacity-0', 'pointer-events-none');
-            
-            expanded.classList.remove('hidden');
-            setTimeout(() => {
-                expanded.classList.remove('opacity-0');
-            }, 100);
-        } else {
-            expanded.classList.add('opacity-0');
-            
-            setTimeout(() => {
-                expanded.classList.add('hidden');
-                
-                island.classList.remove('w-[90vw]', 'max-w-[500px]', 'rounded-[32px]', 'cursor-default');
-                island.classList.add('w-[140px]', 'h-[44px]', 'rounded-full', 'hover:w-[160px]', 'hover:scale-105', 'cursor-pointer');
-                
-                collapsed.classList.remove('opacity-0', 'pointer-events-none');
-            }, 300);
-        }
     }
 
     function scrollToSection(id) {
@@ -674,27 +682,39 @@
         }, 300);
     }
 
-    // Toggle Accordion Item
+    // Toggle Accordion Item (Exclusive Logic)
     function toggleItem(el) {
         const content = el.nextElementSibling;
         const arrow = el.querySelector('.arrow');
         const title = el.querySelector('.item-title');
         
-        const isOpen = content.style.maxHeight;
+        const isOpening = !content.style.maxHeight;
 
-        // Note: For 'Sets' we toggle max-height to show/hide content
-        if (isOpen) {
-            content.style.maxHeight = null;
-            content.classList.remove('opacity-100', 'pb-8');
-            content.classList.add('opacity-0');
-            arrow.classList.remove('rotate-180', 'text-gold');
-            title.classList.remove('text-gold-dark', 'font-bold');
-        } else {
+        // CLOSE ALL OTHER ITEMS
+        const allContents = document.querySelectorAll('.set-item-content');
+        allContents.forEach(c => {
+             // Reset style for others
+             c.style.maxHeight = null;
+             c.classList.remove('opacity-100', 'pb-8');
+             c.classList.add('opacity-0');
+             
+             // Reset header styles
+             const header = c.previousElementSibling;
+             if(header) {
+                 const hArrow = header.querySelector('.arrow');
+                 const hTitle = header.querySelector('.item-title');
+                 if(hArrow) hArrow.classList.remove('rotate-180', 'text-gold');
+                 if(hTitle) hTitle.classList.remove('text-gold-dark');
+             }
+        });
+
+        // TOGGLE CLICKED ITEM
+        if (isOpening) {
             content.style.maxHeight = content.scrollHeight + "px";
             content.classList.remove('opacity-0');
             content.classList.add('opacity-100', 'pb-8');
             arrow.classList.add('rotate-180', 'text-gold');
-            title.classList.add('text-gold-dark', 'font-bold');
+            title.classList.add('text-gold-dark');
         }
     }
 
@@ -705,9 +725,9 @@
         document.getElementById('footer-loc').textContent = UI_TEXT.location_label[currentLang];
         document.getElementById('footer-contact').textContent = UI_TEXT.contact_label[currentLang];
         document.getElementById('footer-country').textContent = UI_TEXT.poland[currentLang];
-        document.getElementById('footer-copy').textContent = UI_TEXT.copyright[currentLang];
+        // Footer copyright updated statically to 2025 in HTML
 
-        // Update Lang Buttons
+        // Update Lang Buttons inside menu
         const plBtns = document.querySelectorAll('.lang-btn-pl');
         const enBtns = document.querySelectorAll('.lang-btn-en');
         if(currentLang === 'pl') {
@@ -718,9 +738,9 @@
             plBtns.forEach(b => { b.classList.remove('bg-gold', 'text-ink'); b.classList.add('text-white/60'); });
         }
 
-        // Update Island Menu List
-        const islandList = document.getElementById('island-menu-list');
-        islandList.innerHTML = DATA.map(s => `
+        // Update Menu List (2-column blocks)
+        const menuList = document.getElementById('menu-list');
+        menuList.innerHTML = DATA.map(s => `
             <button onclick="scrollToSection('${s.id}')" class="text-left px-4 py-3 rounded-xl bg-white/5 hover:bg-gold/20 hover:text-gold transition-colors font-rajdhani text-sm uppercase tracking-wider text-white">
                 ${s.title[currentLang]}
             </button>
@@ -737,7 +757,7 @@
                     <div class="border-b border-gray-200 last:border-0">
                         <div onclick="toggleItem(this)" class="flex items-center justify-between py-6 cursor-pointer group hover:pl-4 transition-all duration-300">
                             <div class="flex flex-col">
-                                <span class="item-title font-cinzel text-xl md:text-2xl transition-colors duration-300 text-ink group-hover:text-gold-dark">
+                                <span class="item-title font-cinzel font-extrabold text-xl md:text-2xl transition-colors duration-300 text-ink group-hover:text-gold-dark">
                                     ${item.name[currentLang]}
                                 </span>
                             </div>
@@ -746,12 +766,12 @@
                                 <span class="arrow text-gray-300 transform transition-transform duration-500">▼</span>
                             </div>
                         </div>
-                        <div class="overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] max-h-0 opacity-0">
+                        <div class="set-item-content overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] max-h-0 opacity-0">
                             <div class="flex flex-col items-start pt-2 px-4 border-l-2 border-gold/30 ml-2">
                                 <h4 class="font-cinzel text-gold text-xs tracking-[0.2em] uppercase mb-3 inline-block">
                                     ${UI_TEXT.description_label[currentLang]}
                                 </h4>
-                                <p class="font-rajdhani text-ink text-lg md:text-xl leading-relaxed whitespace-pre-line">
+                                <p class="font-rajdhani text-gray-600 text-lg md:text-xl leading-relaxed whitespace-pre-line font-medium">
                                     ${item.desc[currentLang]}
                                 </p>
                             </div>
@@ -761,7 +781,7 @@
                     return `
                     <div class="py-6 border-b border-gray-100 last:border-0 group hover:bg-gray-50/50 transition-colors px-4 -mx-4 rounded-xl">
                         <div class="flex justify-between items-baseline gap-4 mb-2">
-                            <h3 class="font-cinzel text-xl text-ink font-semibold group-hover:text-gold-dark transition-colors">
+                            <h3 class="font-cinzel text-xl text-ink font-extrabold group-hover:text-gold-dark transition-colors tracking-wide">
                                 ${item.name[currentLang]}
                             </h3>
                             <span class="font-rajdhani font-bold text-gold-dark text-lg whitespace-nowrap">
