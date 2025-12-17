@@ -398,12 +398,12 @@
           {
             name: { en: 'Sake Tataki', pl: 'Sake Tataki' },
             price: '60 zł',
-            desc: { en: 'chopped salmon served with avocado and japanese spices', pl: 'siekany łosoś podawany z awokado i japońskimi przyprawami' }
+            desc: { en: 'salmon tartare.', pl: 'tatar z łososia.' }
           },
           {
             name: { en: 'Maguro Tataki', pl: 'Maguro Tataki' },
             price: '70 zł',
-            desc: { en: 'chopped tuna served with avocado and japanese spices', pl: 'siekany tuńczyk podawany z awokado i japońskimi przyprawami' }
+            desc: { en: 'tuna tartare.', pl: 'tatar z tuńczyka.' }
           }
         ]
       },
@@ -419,17 +419,17 @@
           {
             name: { en: 'Ramen Chicken', pl: 'Ramen Chicken' },
             price: '60 zł',
-            desc: { en: 'aromatic broth with chicken, vegetables, marinated egg and ramen noodles', pl: 'aromatyczny bulion z kurczakiem, warzywami, marynowanym jajkiem i makaronem ramen' }
+            desc: { en: 'flavorful broth, ramen noodle, vegetables, chicken.', pl: 'Aromatyczny bulion, makaron ramen, warzywa, kurczak.' }
           },
           {
             name: { en: 'Ramen Beef', pl: 'Ramen Beef' },
             price: '65 zł',
-            desc: { en: 'aromatic broth with beef, vegetables, marinated egg and ramen noodles', pl: 'aromatyczny bulion z wołowiną, warzywami, marynowanym jajkiem i makaronem ramen' }
+            desc: { en: 'flavorful broth, ramen noodle, vegetables, beef.', pl: 'Aromatyczny bulion, makaron ramen, warzywa, wołowina.' }
           },
           {
             name: { en: 'Seafood Udon', pl: 'Seafood Udon' },
             price: '60 zł',
-            desc: { en: 'Spicy seafood soup with vegetables and udon noodles', pl: 'Ostra zupa z owocami morza, warzywami i makaronem udon' }
+            desc: { en: 'spicy soup with seafood, vegetables, udon noodles.', pl: 'pikantna zupa z owocami morza, warzywami i makaronem udon.' }
           }
         ]
       },
@@ -551,16 +551,36 @@
     let currentLang = 'pl';
     let isMenuExpanded = false;
 
-    // PROTECTION: Disable right click and developer shortcuts
+    /* =========================================
+       SECURITY & PROTECTION SYSTEM
+       ========================================= */
+    // 1. Disable Context Menu
     document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // 2. Disable Dragging
+    document.addEventListener('dragstart', (e) => e.preventDefault());
+    
+    // 3. Disable Keyboard Shortcuts (Inspect, Save, Print, Source)
     document.addEventListener('keydown', (e) => {
-      // F12, Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+Shift+J, Ctrl+U
-      if (e.key === 'F12' || 
-         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-         (e.ctrlKey && e.key === 'U')) {
+      const isCtrl = e.ctrlKey || e.metaKey;
+      
+      if (
+         e.key === 'F12' || 
+         (isCtrl && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) ||
+         (isCtrl && ['U', 'S', 'P'].includes(e.key.toUpperCase()))
+      ) {
          e.preventDefault();
+         e.stopPropagation();
       }
     });
+
+    // 4. Anti-Debug Loop (Freezes execution when DevTools is open)
+    setInterval(() => {
+        // The debugger statement stops the script if DevTools is open. 
+        // It's a common "protection" method.
+        debugger; 
+    }, 2000);
+
 
     function init() {
       // Intro sequence
